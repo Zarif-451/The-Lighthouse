@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings — Lighthouse</title>
+  <script src="assets/js/theme.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/theme-dark.css" />
+</head>
+<body class="dash">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="brand"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.5 3M12 2 10.5 5"/><path d="M8.5 9h7l1.5 12h-10z"/></svg></span> Lighthouse</a>
+      <div class="side-label">Menu</div>
+      <nav class="side-nav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="checkins.html">Daily Check-ins</a>
+        <a href="journal.html">Reflection Journal</a>
+        <a href="insights.html">Insights</a>
+        <a href="reports.html">Reports</a>
+        <a href="profile.html">Profile</a>
+        <a href="settings.html" class="active">Settings</a>
+      </nav>
+
+      <div class="side-foot"><button class="logout-btn" id="logoutBtn">Log out</button></div>
+    </aside>
+    <div class="overlay" id="overlay"></div>
+    <div class="main">
+      <header class="topbar">
+        <button class="hamburger" id="hamburger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div class="greeting"><h1>Settings</h1><p>Preferences for your Lighthouse experience</p></div>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
+        <button class="user-chip"><span class="ava" id="userAva">U</span><span class="u-meta"><span class="u-name" id="userName">User</span><span class="u-role">Personal account</span></span></button>
+      </header>
+      <div class="content">
+        <section class="settings-list rise">
+          <div class="settings-row">
+            <div><h4>Theme Preference</h4><p>Light or dark appearance across Lighthouse</p></div>
+            <div class="chart-toggle" id="themePref">
+              <button data-theme-set="light" class="active">Light</button>
+              <button data-theme-set="dark">Dark</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div><h4>Notification Preference</h4><p>Gentle reminders for your daily journey</p></div>
+            <label class="switch"><input type="checkbox" id="notifPref" checked /><span></span></label>
+          </div>
+          <div class="settings-row">
+            <div><h4>Privacy Preference</h4><p>Keep reflections private to your account</p></div>
+            <select id="privacyPref" style="padding:10px 12px;border-radius:12px;border:1.5px solid var(--border-strong);background:var(--surface)">
+              <option value="private">Private</option>
+              <option value="anonymous_analytics">Anonymous analytics only</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div><h4>Language</h4><p>Optional interface language</p></div>
+            <select id="langPref" style="padding:10px 12px;border-radius:12px;border:1.5px solid var(--border-strong);background:var(--surface)">
+              <option value="en">English</option>
+              <option value="bn">Bangla</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="saveSettingsBtn" style="align-self:flex-start">Save Settings</button>
+        </section>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"><span class="t-ic">✓</span><span id="toastMsg">OK</span></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/shell.js"></script>
+  <script src="assets/js/settings.js"></script>
+</body>
+</html>

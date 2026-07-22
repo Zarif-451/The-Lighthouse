@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insights — Lighthouse</title>
+  <script src="assets/js/theme.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗼</text></svg>" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/theme-dark.css" />
+</head>
+<body class="dash">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="brand"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.5 3M12 2 10.5 5"/><path d="M8.5 9h7l1.5 12h-10z"/></svg></span> Lighthouse</a>
+      <div class="side-label">Menu</div>
+      <nav class="side-nav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="checkins.html">Daily Check-ins</a>
+        <a href="journal.html">Reflection Journal</a>
+        <a href="insights.html" class="active">Insights</a>
+        <a href="reports.html">Reports</a>
+        <a href="profile.html">Profile</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+
+      <div class="side-foot"><button class="logout-btn" id="logoutBtn">Log out</button></div>
+    </aside>
+    <div class="overlay" id="overlay"></div>
+    <div class="main">
+      <header class="topbar">
+        <button class="hamburger" id="hamburger" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div class="greeting"><h1>Insights</h1><p>Behavioural patterns from your Lighthouse activity</p></div>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
+        <button class="user-chip"><span class="ava" id="userAva">U</span><span class="u-meta"><span class="u-name" id="userName">User</span><span class="u-role">Personal account</span></span></button>
+      </header>
+      <div class="content">
+        <div class="page-head rise"><div><h2>Insights</h2><p>Supportive observations only — never medical advice or diagnoses.</p></div></div>
+        <section class="compare-grid rise" id="compareGrid"></section>
+        <section class="card card-pad rise"><div class="block-head"><div><h3>Supportive summaries</h3><p>Based on your recent activity</p></div></div><div class="summary-chips" id="summaryChips"></div></section>
+        <section class="charts-2">
+          <div class="card card-pad rise"><div class="block-head"><div><h3>Sleep Trend</h3><p>Recent check-ins</p></div></div><div class="chart-canvas-wrap"><canvas id="sleepChart"></canvas></div></div>
+          <div class="card card-pad rise"><div class="block-head"><div><h3>Mood Trend</h3><p>1–5 scale</p></div></div><div class="chart-canvas-wrap"><canvas id="moodChart"></canvas></div></div>
+          <div class="card card-pad rise"><div class="block-head"><div><h3>Productivity Trend</h3><p>1–5 scale</p></div></div><div class="chart-canvas-wrap"><canvas id="prodChart"></canvas></div></div>
+          <div class="card card-pad rise"><div class="block-head"><div><h3>Visual Reflection Pattern</h3><p>Selected themes</p></div></div><div class="doughnut-wrap" style="height:240px"><canvas id="visualChart"></canvas></div><div class="chart-legend" id="visualLegend"></div></div>
+        </section>
+        <section class="behavior-grid rise" id="freqGrid"></section>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"><span class="t-ic">✓</span><span id="toastMsg">OK</span></div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/shell.js"></script>
+  <script src="assets/js/insights.js"></script>
+</body>
+</html>

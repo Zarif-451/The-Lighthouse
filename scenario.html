@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scenario Assessment — Lighthouse</title>
+  <script src="assets/js/theme.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗼</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/theme-dark.css" />
+</head>
+<body class="dash">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="brand">
+        <span class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 3M12 2 10.5 5"/><path d="M8.5 9h7l1.5 12h-10z"/><path d="M9 13h6M8.7 17h6.6"/><path d="M2 6l3 1M22 6l-3 1"/></svg>
+        </span>
+        Lighthouse
+      </a>
+      <div class="side-label">Menu</div>
+      <nav class="side-nav">
+        <a href="dashboard.html" data-nav="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="9" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="12" width="8" height="9" rx="2"/><rect x="3" y="16" width="8" height="5" rx="2"/></svg> Dashboard</a>
+        <a href="checkins.html" data-nav="Daily Check-ins"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg> Daily Check-ins</a>
+        <a href="journal.html" data-nav="Reflection Journal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg> Reflection Journal</a>
+        <a href="insights.html" data-nav="Insights"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/><path d="M9 21h6"/></svg> Insights</a>
+        <a href="reports.html" data-nav="Reports"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg> Reports</a>
+        <a href="profile.html" data-nav="Profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> Profile</a>
+        <a href="settings.html" data-nav="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg> Settings</a>
+      </nav>
+      <div class="side-foot">
+        <button class="logout-btn" id="logoutBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+          Log out
+        </button>
+      </div>
+    </aside>
+    <div class="overlay" id="overlay"></div>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="hamburger" id="hamburger" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <div class="greeting">
+          <h1>Scenario Assessment</h1>
+          <p>Step 2 of today’s wellbeing journey</p>
+        </div>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
+        <button class="user-chip" id="userChip">
+          <span class="ava" id="userAva">U</span>
+          <span class="u-meta"><span class="u-name" id="userName">User</span><span class="u-role">Personal account</span></span>
+        </button>
+      </header>
+
+      <div class="content">
+        <div class="flow-banner rise">
+          <div>
+            <strong>Guided journey</strong>
+            <p>One everyday situation per day — choose the response that feels most like you. Not a diagnosis.</p>
+          </div>
+          <a class="btn btn-ghost" href="dashboard.html">Exit to Dashboard</a>
+        </div>
+
+        <section class="card card-pad rise scenario-card" id="scenarioPanel">
+          <p class="scenario-loading" id="scenarioLoading">Loading today’s scenario…</p>
+          <div id="scenarioContent" hidden>
+            <span class="eyebrow" id="scenarioCategory">Category</span>
+            <h2 id="scenarioTitle" style="margin-top:12px;font-size:1.45rem;font-weight:800;letter-spacing:-0.02em;">Title</h2>
+            <p class="scenario-story" id="scenarioStory"></p>
+            <p class="scenario-question" id="scenarioQuestion"></p>
+            <div class="option-grid" id="optionGrid"></div>
+            <div class="form-actions" style="margin-top:18px">
+              <button type="button" class="btn btn-primary" id="submitScenarioBtn" disabled>Continue</button>
+            </div>
+            <p class="journal-hint" id="scenarioHint"></p>
+          </div>
+          <div id="scenarioDone" hidden>
+            <span class="status-chip good">Completed today</span>
+            <h3 style="margin-top:14px;font-size:1.25rem;font-weight:800;">You’ve answered today’s scenario</h3>
+            <p id="doneSummary" class="scenario-story"></p>
+            <div class="form-actions" style="margin-top:18px">
+              <a class="btn btn-primary" id="continueVisualBtn" href="visual.html?flow=1">Continue to Visual Reflection</a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+    <span id="toastMsg">Success</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script>if (window.LighthouseTheme) window.LighthouseTheme.bindToggles();</script>
+  <script src="assets/js/scenario.js"></script>
+</body>
+</html>

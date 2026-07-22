@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scenarios — Admin</title>
+  <script src="../assets/js/theme.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <link rel="stylesheet" href="../assets/css/dashboard.css" />
+  <link rel="stylesheet" href="../assets/css/theme-dark.css" />
+</head>
+<body class="dash" data-admin-page="scenarios">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="/admin/index.html" class="brand"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.5 3M12 2 10.5 5"/><path d="M8.5 9h7l1.5 12h-10z"/></svg></span> Lighthouse Admin</a>
+      <div class="side-label">Admin</div>
+      <nav class="side-nav">
+        <a href="/admin/index.html">Dashboard</a>
+        <a href="/admin/users.html">Users</a>
+        <a href="/admin/scenarios.html" class="active">Scenarios</a>
+        <a href="/admin/reports.html">Reports</a>
+        <a href="/admin/analytics.html">Analytics</a>
+        <a href="/admin/settings.html">Settings</a>
+      </nav>
+      <div class="side-foot"><button class="logout-btn" id="logoutBtn">Log out</button></div>
+    </aside>
+    <div class="overlay" id="overlay"></div>
+    <div class="main">
+      <header class="topbar">
+        <button class="hamburger" id="hamburger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div class="greeting"><h1>Scenario Management</h1><p>Create, edit, enable or disable scenarios</p></div>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
+        <button class="user-chip"><span class="ava" id="userAva">A</span><span class="u-meta"><span class="u-name" id="userName">Admin</span><span class="u-role">Administrator</span></span></button>
+      </header>
+      <div class="content">
+        <section class="card card-pad rise form-card">
+          <div class="block-head"><div><h3 id="scFormTitle">Create Scenario</h3></div></div>
+          <form id="scenarioForm" class="checkin-form">
+            <input type="hidden" id="scId" />
+            <div class="form-grid">
+              <div class="field"><label>Title</label><input id="scTitle" required /></div>
+              <div class="field"><label>Category</label><input id="scCategory" required placeholder="e.g. Time Management" /></div>
+            </div>
+            <div class="field"><label>Story</label><textarea id="scStory" rows="3" required></textarea></div>
+            <div class="field"><label>Question</label><input id="scQuestion" required /></div>
+            <div class="form-grid">
+              <div class="field"><label>Option A</label><input id="scA" required /></div>
+              <div class="field"><label>Option B</label><input id="scB" required /></div>
+              <div class="field"><label>Option C</label><input id="scC" required /></div>
+              <div class="field"><label>Option D</label><input id="scD" required /></div>
+            </div>
+            <label style="display:flex;gap:8px;align-items:center;margin:8px 0 12px"><input type="checkbox" id="scActive" checked /> Enabled for users</label>
+            <button class="btn btn-primary" type="submit">Save Scenario</button>
+          </form>
+        </section>
+        <div class="admin-table-wrap rise">
+          <table class="data-table">
+            <thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="scenariosBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"><span class="t-ic">✓</span><span id="toastMsg">OK</span></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/shell.js"></script>
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>

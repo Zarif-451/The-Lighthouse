@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Check-ins — Lighthouse</title>
+  <script src="assets/js/theme.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗼</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/theme-dark.css" />
+</head>
+<body class="dash">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="brand">
+        <span class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 3M12 2 10.5 5"/><path d="M8.5 9h7l1.5 12h-10z"/><path d="M9 13h6M8.7 17h6.6"/><path d="M2 6l3 1M22 6l-3 1"/></svg>
+        </span>
+        Lighthouse
+      </a>
+      <div class="side-label">Menu</div>
+      <nav class="side-nav">
+        <a href="dashboard.html" data-nav="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="9" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="12" width="8" height="9" rx="2"/><rect x="3" y="16" width="8" height="5" rx="2"/></svg> Dashboard</a>
+        <a href="checkins.html" class="active" data-nav="Daily Check-ins"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg> Daily Check-ins</a>
+        <a href="journal.html" data-nav="Reflection Journal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg> Reflection Journal</a>
+        <a href="insights.html">Insights</a>
+        <a href="reports.html">Reports</a>
+        <a href="profile.html">Profile</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+
+      <div class="side-foot">
+        <button class="logout-btn" id="logoutBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+          Log out
+        </button>
+      </div>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="hamburger" id="hamburger" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <div class="greeting">
+          <h1>Daily Check-ins</h1>
+          <p>Quickly record today’s wellbeing in one place.</p>
+        </div>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
+        <button class="user-chip" id="userChip">
+          <span class="ava" id="userAva">U</span>
+          <span class="u-meta"><span class="u-name" id="userName">User</span><span class="u-role">Personal account</span></span>
+        </button>
+      </header>
+
+      <div class="content">
+        <div class="page-head rise">
+          <div>
+            <h2>Daily Check-ins</h2>
+            <p>One check-in per day. If you’ve already submitted today, you can edit it.</p>
+          </div>
+          <span class="date-pill" id="todayDate">Today</span>
+        </div>
+
+        <div class="flow-banner rise" id="flowBanner" hidden>
+          <div>
+            <strong>Today’s wellbeing journey</strong>
+            <p>Step 1 of 4 — after saving, you’ll continue to Scenario Assessment automatically.</p>
+          </div>
+        </div>
+
+        <section class="card card-pad rise form-card">
+          <div class="block-head">
+            <div>
+              <h3 id="formTitle">Today’s Check-in</h3>
+              <p id="formSub">Record how today feels so far.</p>
+            </div>
+            <span class="status-chip good" id="todayBadge" hidden>Saved today</span>
+          </div>
+
+          <form id="checkinForm" class="checkin-form" novalidate>
+            <div class="form-grid">
+              <div class="field">
+                <label for="sleepHours">Sleep Hours (0–12)</label>
+                <input type="number" id="sleepHours" min="0" max="12" step="0.5" placeholder="e.g. 7.5" required />
+              </div>
+              <div class="field">
+                <label for="mood">Mood</label>
+                <select id="mood" required>
+                  <option value="">Select mood</option>
+                  <option>Very Low</option>
+                  <option>Low</option>
+                  <option>Neutral</option>
+                  <option>Good</option>
+                  <option>Excellent</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="energy">Energy Level <span class="range-val" id="energyVal">3</span></label>
+                <input type="range" id="energy" min="1" max="5" step="1" value="3" />
+              </div>
+              <div class="field">
+                <label for="productivity">Productivity <span class="range-val" id="prodVal">3</span></label>
+                <input type="range" id="productivity" min="1" max="5" step="1" value="3" />
+              </div>
+              <div class="field">
+                <label for="activity">Physical Activity</label>
+                <select id="activity" required>
+                  <option value="">Select level</option>
+                  <option>None</option>
+                  <option>Light</option>
+                  <option>Moderate</option>
+                  <option>High</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="water">Water Intake <span class="optional">(optional)</span></label>
+                <input type="text" id="water" placeholder="e.g. 6 glasses" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="notes">Today’s Notes <span class="optional">(optional)</span></label>
+              <textarea id="notes" rows="4" placeholder="Anything worth noting about today…"></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-outline" id="deleteTodayBtn" hidden>Delete today’s entry</button>
+              <button type="submit" class="btn btn-primary" id="saveCheckinBtn">Save Check-in</button>
+            </div>
+            <p class="journal-hint" id="formHint"></p>
+          </form>
+        </section>
+
+        <section class="rise">
+          <div class="block-head">
+            <div>
+              <h3>Check-in History</h3>
+              <p>Your previous daily check-ins, newest first</p>
+            </div>
+          </div>
+          <div class="history-list" id="checkinHistory"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+    <span id="toastMsg">Success</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/shell.js"></script>
+  <script src="assets/js/checkins.js"></script>
+</body>
+</html>

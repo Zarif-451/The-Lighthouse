@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Reflection Journal — record daily experiences with Lighthouse." />
+  <title>Reflection Journal — Lighthouse</title>
+  <script src="assets/js/theme.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗼</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/theme-dark.css" />
+</head>
+<body class="dash">
+  <div class="layout">
+
+    <!-- ============================ SIDEBAR ============================ -->
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="brand">
+        <span class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 3M12 2 10.5 5"/><path d="M8.5 9h7l1.5 12h-10z"/><path d="M9 13h6M8.7 17h6.6"/><path d="M2 6l3 1M22 6l-3 1"/></svg>
+        </span>
+        Lighthouse
+      </a>
+
+      <div class="side-label">Menu</div>
+      <nav class="side-nav">
+        <a href="dashboard.html" data-nav="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="9" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="12" width="8" height="9" rx="2"/><rect x="3" y="16" width="8" height="5" rx="2"/></svg> Dashboard</a>
+        <a href="checkins.html" data-nav="Daily Check-ins"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg> Daily Check-ins</a>
+        <a href="journal.html" class="active" data-nav="Reflection Journal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg> Reflection Journal</a>
+        <a href="insights.html" data-nav="Insights">Insights</a>
+        <a href="reports.html" data-nav="Reports">Reports</a>
+        <a href="profile.html" data-nav="Profile">Profile</a>
+        <a href="settings.html" data-nav="Settings">Settings</a>
+      </nav>
+
+
+      <div class="side-foot">
+        <div class="side-card">
+          <div class="sc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 3M12 2 10.5 5"/><path d="M8.5 9h7l1.5 12h-10z"/><path d="M9 13h6"/></svg></div>
+          <h5>Keep your streak</h5>
+          <p>A short reflection today helps you notice patterns over time.</p>
+          <button class="btn btn-teal" id="focusWriteBtn">Write now</button>
+        </div>
+        <button class="logout-btn" id="logoutBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+          Log out
+        </button>
+      </div>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="hamburger" id="hamburger" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <div class="greeting">
+          <h1>Reflection Journal</h1>
+          <p>Your private space for daily thoughts and observations.</p>
+        </div>
+
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="historySearch" placeholder="Search my reflections…" />
+        </div>
+
+        <button class="icon-btn" id="notifBtn" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        </button>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
+
+        <button class="user-chip" id="userChip">
+          <span class="ava" id="userAva">U</span>
+          <span class="u-meta">
+            <span class="u-name" id="userName">User</span>
+            <span class="u-role">Personal account</span>
+          </span>
+        </button>
+      </header>
+
+      <div class="content">
+        <div class="page-head rise">
+          <div>
+            <h2>Reflection Journal</h2>
+            <p>Record daily experiences, observations, and personal reflections.</p>
+          </div>
+          <span class="date-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span id="todayDate">Today</span>
+          </span>
+        </div>
+
+        <!-- Compose form -->
+        <section class="card card-pad journal-compose rise">
+          <div class="block-head">
+            <div>
+              <h3>New Reflection</h3>
+              <p>Write freely — this stays private to your account.</p>
+            </div>
+          </div>
+          <label class="journal-label" for="reflectionText">Your reflection</label>
+          <textarea
+            id="reflectionText"
+            class="journal-textarea"
+            rows="8"
+            maxlength="4000"
+            placeholder="How are you feeling today? What stood out? What are you grateful for?"
+          ></textarea>
+          <div class="journal-footer">
+            <span class="char-count"><span id="charCount">0</span> / 4000</span>
+            <button type="button" class="btn btn-primary" id="saveReflectionBtn">
+              Save Reflection
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+            </button>
+          </div>
+          <p class="journal-hint" id="journalHint"></p>
+        </section>
+
+        <!-- History -->
+        <section class="rise">
+          <div class="block-head">
+            <div>
+              <h3>Reflection History</h3>
+              <p id="historyMeta">Your previous reflections, newest first</p>
+            </div>
+          </div>
+          <div class="journal-history" id="journalHistory">
+            <div class="empty-state" id="historyEmpty">
+              <p>No reflections yet. Write your first one above — it will appear here after you save.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+    <span id="toastMsg">Success</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/shell.js"></script>
+  <script src="assets/js/journal.js"></script>
+</body>
+</html>

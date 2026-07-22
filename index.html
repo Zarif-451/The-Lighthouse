@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Lighthouse — Guiding Wellbeing Through Awareness and Reflection. Track habits, reflect on daily experiences, and gain meaningful insights into personal wellbeing." />
+  <title>Lighthouse — Guiding Wellbeing Through Awareness</title>
+  <script src="assets/js/theme.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗼</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/theme-dark.css" />
+</head>
+<body>
+
+  <!-- ============================ NAVBAR ============================ -->
+  <header class="nav" id="nav">
+    <div class="container">
+      <a href="#home" class="brand" aria-label="Lighthouse home">
+        <span class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 3M12 2 10.5 5"/><path d="M8.5 9h7l1.5 12h-10z"/><path d="M9 13h6M8.7 17h6.6"/><path d="M2 6l3 1M22 6l-3 1"/></svg>
+        </span>
+        Lighthouse
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="#home">Home</a>
+        <a href="#features">Features</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme" title="Toggle light/dark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+        </button>
+        <button class="btn btn-ghost" data-auth="login">Login</button>
+        <button class="btn btn-primary" data-auth="signup">Sign Up</button>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============================ HERO ============================ -->
+    <section class="hero" id="home">
+      <div class="container">
+        <div class="hero-copy">
+          <span class="eyebrow reveal">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/><circle cx="12" cy="12" r="4"/></svg>
+            Personal Wellbeing Platform
+          </span>
+          <h1 class="reveal d1">Light<span class="text-gradient">house</span></h1>
+          <p class="subtitle reveal d1">Guiding Wellbeing Through Awareness and Reflection</p>
+          <p class="desc reveal d2">Track habits, reflect on daily experiences, and gain meaningful insights into personal wellbeing through simple and elegant interactions.</p>
+          <div class="hero-cta reveal d3">
+            <button class="btn btn-primary btn-lg" data-auth="signup">
+              Get Started
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+            <button class="btn btn-ghost btn-lg" data-auth="login">Login</button>
+          </div>
+          <div class="hero-trust reveal d4">
+            <div class="avatars">
+              <span style="background:#1E3A8A">A</span>
+              <span style="background:#14B8A6">M</span>
+              <span style="background:#F59E0B">J</span>
+              <span style="background:#6d28d9">S</span>
+            </div>
+            <div>
+              <div class="stars">★★★★★</div>
+              <small>Loved by people building calmer, healthier routines</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard preview mockup -->
+        <div class="hero-visual reveal d2">
+          <div class="mockup">
+            <div class="mockup-bar"><i></i><i></i><i></i></div>
+            <div class="mk-head">
+              <div>
+                <div class="mk-title">My Wellbeing Overview</div>
+                <div class="mk-sub">Last 30 days · updated today</div>
+              </div>
+              <span class="mk-pill">On track</span>
+            </div>
+            <div class="mk-stats">
+              <div class="mk-stat"><div class="lbl">Wellness</div><div class="val">82<small>▲4</small></div></div>
+              <div class="mk-stat"><div class="lbl">Check-ins</div><div class="val">27<small>▲3</small></div></div>
+              <div class="mk-stat"><div class="lbl">Streak</div><div class="val">12<small>days</small></div></div>
+            </div>
+            <div class="mk-chart">
+              <div class="lbl">Wellness score trend</div>
+              <div class="mk-spark">
+                <span style="height:52%"></span><span style="height:66%"></span><span style="height:44%"></span>
+                <span style="height:78%"></span><span style="height:60%"></span><span style="height:88%"></span>
+                <span style="height:72%"></span><span style="height:95%"></span><span style="height:80%"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="float-card fc-1">
+            <span class="ic ic-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span>
+            <div><div class="t">Mood improving</div><div class="s">+12% this week</div></div>
+          </div>
+          <div class="float-card fc-2">
+            <span class="ic ic-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/><path d="M9 21h6M10 17v4M14 17v4"/></svg></span>
+            <div><div class="t">New insight</div><div class="s">Sleep is more consistent</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ ABOUT ============================ -->
+    <section class="section about" id="about">
+      <div class="container">
+        <div class="about-copy reveal">
+          <span class="eyebrow">About</span>
+          <h2>About Lighthouse</h2>
+          <p>Lighthouse is a personal wellbeing and self-reflection platform designed to help individuals better understand their daily habits, routines, and overall wellness.</p>
+          <p>Through thoughtful check-ins, behavioral insights, and guided reflections, Lighthouse encourages self-awareness and supports healthier lifestyle choices.</p>
+          <p>Rather than relying on intrusive questionnaires, Lighthouse gathers insights through everyday activities, reflections, and engagement patterns to provide a comfortable and user-friendly experience.</p>
+        </div>
+        <div class="about-benefits reveal d2">
+          <div class="benefit"><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Understand daily routines</span></div>
+          <div class="benefit"><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Build positive habits</span></div>
+          <div class="benefit"><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Track wellness trends</span></div>
+          <div class="benefit"><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Improve self-awareness</span></div>
+          <div class="benefit"><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Reflect on personal growth</span></div>
+          <div class="benefit"><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Maintain healthy patterns</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ FEATURES ============================ -->
+    <section class="section features" id="features">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Features</span>
+          <h2>Everything you need for mindful living</h2>
+          <p>A thoughtful toolkit that turns everyday moments into meaningful, actionable insight — all in one calming space.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card reveal">
+            <div class="f-ic ic-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg></div>
+            <h3>Daily Check-ins</h3>
+            <p>Track everyday habits and activities with quick, friendly check-ins that take moments to complete.</p>
+          </article>
+          <article class="feature-card reveal d1">
+            <div class="f-ic ic-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></div>
+            <h3>Behavioral Insights</h3>
+            <p>Discover trends in routines and engagement to understand what shapes your day.</p>
+          </article>
+          <article class="feature-card reveal d2">
+            <div class="f-ic ic-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div>
+            <h3>Reflection Journal</h3>
+            <p>Record daily experiences and thoughts in a private, calming journaling space.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="f-ic ic-violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+            <h3>Wellness Tracking</h3>
+            <p>Monitor wellbeing patterns over time and celebrate steady, healthy progress.</p>
+          </article>
+          <article class="feature-card reveal d1">
+            <div class="f-ic ic-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="12" width="4" height="8" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="17" y="3" width="4" height="17" rx="1"/></svg></div>
+            <h3>Smart Analytics</h3>
+            <p>Visualize progress through intuitive charts that make trends easy to grasp.</p>
+          </article>
+          <article class="feature-card reveal d2">
+            <div class="f-ic ic-rose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/><path d="M9 21h6M10 17v4M14 17v4"/></svg></div>
+            <h3>Personalized Recommendations</h3>
+            <p>Receive helpful wellness suggestions tailored to your unique patterns.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ HOW IT WORKS ============================ -->
+    <section class="section how" id="how">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">How it works</span>
+          <h2>Three simple steps to clarity</h2>
+          <p>Getting started is effortless. Build a gentle routine and let Lighthouse do the rest.</p>
+        </div>
+        <div class="how-grid">
+          <div class="step-card reveal">
+            <div class="step-num">1</div>
+            <div class="s-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg></div>
+            <h3>Complete daily check-ins</h3>
+            <p>Answer a few gentle prompts about your day in under a minute.</p>
+          </div>
+          <div class="step-card reveal d1">
+            <div class="step-num">2</div>
+            <div class="s-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div>
+            <h3>Record activities & reflections</h3>
+            <p>Capture experiences and thoughts to build a richer picture over time.</p>
+          </div>
+          <div class="step-card reveal d2">
+            <div class="step-num">3</div>
+            <div class="s-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></div>
+            <h3>Receive personalized insights</h3>
+            <p>Get meaningful wellness analytics and gentle guidance for what's next.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ AUTH ============================ -->
+    <section class="section auth-section" id="auth">
+      <div class="container">
+        <div class="auth-wrap">
+          <div class="auth-pitch reveal">
+            <span class="eyebrow">Get started</span>
+            <h2>Begin your wellbeing journey today</h2>
+            <p>Create your free account or log back in to continue. Your reflections stay private and are always yours.</p>
+            <ul class="pitch-list">
+              <li><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Private, personal dashboard</li>
+              <li><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> No intrusive questionnaires</li>
+              <li><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Insights from everyday moments</li>
+            </ul>
+          </div>
+
+          <div class="auth-card reveal d2">
+            <div class="auth-tabs">
+              <button id="tabLogin" class="active" data-tab="login">Login</button>
+              <button id="tabSignup" data-tab="signup">Sign Up</button>
+              <button id="tabAdmin" data-tab="admin">Admin</button>
+            </div>
+
+            <!-- Login form -->
+            <form class="auth-form active" id="loginForm" novalidate>
+              <h3>Welcome back</h3>
+              <p class="form-sub">Log in to continue to your personal dashboard.</p>
+
+              <div class="field">
+                <label for="loginEmail">Email</label>
+                <div class="input-wrap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>
+                  <input type="email" id="loginEmail" name="email" placeholder="you@example.com" autocomplete="email" />
+                </div>
+                <span class="err" data-err="loginEmail">Please enter a valid email address.</span>
+              </div>
+
+              <div class="field">
+                <label for="loginPassword">Password</label>
+                <div class="input-wrap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                  <input type="password" id="loginPassword" name="password" placeholder="Enter your password" autocomplete="current-password" />
+                  <button type="button" class="toggle-pass" data-toggle="loginPassword" aria-label="Show password">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <span class="err" data-err="loginPassword">Password must be at least 6 characters.</span>
+              </div>
+
+              <div class="auth-row">
+                <label><input type="checkbox" id="remember" /> Remember me</label>
+                <a href="#auth" id="forgotPasswordLink">Forgot password?</a>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block btn-lg">Login</button>
+              <p class="auth-alt">Don't have an account? <button type="button" data-tab="signup">Sign up</button>
+                · Staff? <button type="button" data-tab="admin">Sign in as Admin</button></p>
+            </form>
+
+            <!-- Sign up form -->
+            <form class="auth-form" id="signupForm" novalidate>
+              <h3>Create your account</h3>
+              <p class="form-sub">Start your wellbeing journey in seconds.</p>
+
+              <div class="field">
+                <label for="signupName">Full Name</label>
+                <div class="input-wrap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+                  <input type="text" id="signupName" name="name" placeholder="Your full name" autocomplete="name" />
+                </div>
+                <span class="err" data-err="signupName">Please enter your full name.</span>
+              </div>
+
+              <div class="field">
+                <label for="signupEmail">Email</label>
+                <div class="input-wrap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>
+                  <input type="email" id="signupEmail" name="email" placeholder="you@example.com" autocomplete="email" />
+                </div>
+                <span class="err" data-err="signupEmail">Please enter a valid email address.</span>
+              </div>
+
+              <div class="field">
+                <label for="signupPassword">Password</label>
+                <div class="input-wrap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                  <input type="password" id="signupPassword" name="password" placeholder="Create a password" autocomplete="new-password" />
+                  <button type="button" class="toggle-pass" data-toggle="signupPassword" aria-label="Show password">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <span class="err" data-err="signupPassword">Password must be at least 6 characters.</span>
+              </div>
+
+              <div class="field">
+                <label for="signupConfirm">Confirm Password</label>
+                <div class="input-wrap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                  <input type="password" id="signupConfirm" name="confirm" placeholder="Re-enter your password" autocomplete="new-password" />
+                </div>
+                <span class="err" data-err="signupConfirm">Passwords do not match.</span>
+              </div>
+
+              <button type="submit" class="btn btn-teal btn-block btn-lg">Create Account</button>
+              <p class="auth-alt">Already have an account? <button type="button" data-tab="login">Login</button></p>
+            </form>
+
+            <!-- Admin login form (same page, separate tab) -->
+            <form class="auth-form" id="adminForm" novalidate>
+              <h3>Admin sign in</h3>
+              <p class="form-sub">Sign in to the Admin Portal. Only admin accounts can continue here.</p>
+
+              <div class="field">
+                <label for="adminEmail">Admin Email</label>
+                <div class="input-wrap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>
+                  <input type="email" id="adminEmail" name="adminEmail" placeholder="admin@example.com" autocomplete="username" />
+                </div>
+                <span class="err" data-err="adminEmail">Please enter a valid email address.</span>
+              </div>
+
+              <div class="field">
+                <label for="adminPassword">Password</label>
+                <div class="input-wrap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                  <input type="password" id="adminPassword" name="adminPassword" placeholder="Enter your password" autocomplete="current-password" />
+                  <button type="button" class="toggle-pass" data-toggle="adminPassword" aria-label="Show password">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <span class="err" data-err="adminPassword">Password must be at least 6 characters.</span>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block btn-lg">Sign in as Admin</button>
+              <p class="auth-alt">Not an admin? <button type="button" data-tab="login">User login</button></p>
+            </form>
+
+            <p class="auth-note">🔒 Secure sign-in powered by Supabase. Your reflections stay private to your account.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================ FOOTER ============================ -->
+  <footer class="footer" id="contact">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <a href="#home" class="brand">
+            <span class="logo-mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 3M12 2 10.5 5"/><path d="M8.5 9h7l1.5 12h-10z"/><path d="M9 13h6M8.7 17h6.6"/><path d="M2 6l3 1M22 6l-3 1"/></svg>
+            </span>
+            Lighthouse
+          </a>
+          <p>Guiding wellbeing through awareness and reflection. Build healthier routines with gentle, private, everyday insight.</p>
+          <div class="social">
+            <a href="#contact" aria-label="Twitter"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.3 8.3L23 22h-6.8l-5.3-6.9L4.8 22H1.7l7.8-8.9L1 2h7l4.8 6.3L18.9 2zm-2.4 18h1.9L7.6 4H5.6l10.9 16z"/></svg></a>
+            <a href="#contact" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.8-2.05 3.7-2.05C20.4 8.65 22 10.9 22 14.3V21h-4v-5.9c0-1.4 0-3.2-2-3.2s-2.3 1.5-2.3 3.1V21H9z"/></svg></a>
+            <a href="#contact" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg></a>
+            <a href="#contact" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.1-1.47-1.1-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg></a>
+          </div>
+        </div>
+
+        <div>
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#how">How It Works</a></li>
+            <li><a href="#auth">Get Started</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Company</h4>
+          <ul class="footer-links">
+            <li><a href="#contact">Privacy Policy</a></li>
+            <li><a href="#contact">Terms of Service</a></li>
+            <li><a href="#contact">Security</a></li>
+            <li><a href="#auth" id="footerAdminLink">Admin Login</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Contact</h4>
+          <ul class="footer-contact">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg> hello@lighthouse.app</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg> +1 (555) 010-2024</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> 24 Harbor View, Seaside</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 Lighthouse. All rights reserved.</span>
+        <span>Made with care for calmer, healthier days.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+    <span id="toastMsg">Success</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script>if (window.LighthouseTheme) window.LighthouseTheme.bindToggles();</script>
+</body>
+</html>

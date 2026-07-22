@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Reports</title>
+  <script src="../assets/js/theme.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <link rel="stylesheet" href="../assets/css/dashboard.css" />
+  <link rel="stylesheet" href="../assets/css/theme-dark.css" />
+</head>
+<body class="dash" data-admin-page="reports">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="/admin/index.html" class="brand"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.5 3M12 2 10.5 5"/><path d="M8.5 9h7l1.5 12h-10z"/></svg></span> Lighthouse Admin</a>
+      <div class="side-label">Admin</div>
+      <nav class="side-nav">
+        <a href="/admin/index.html">Dashboard</a>
+        <a href="/admin/users.html">Users</a>
+        <a href="/admin/scenarios.html">Scenarios</a>
+        <a href="/admin/reports.html" class="active">Reports</a>
+        <a href="/admin/analytics.html">Analytics</a>
+        <a href="/admin/settings.html">Settings</a>
+      </nav>
+      <div class="side-foot"><button class="logout-btn" id="logoutBtn">Log out</button></div>
+    </aside>
+    <div class="overlay" id="overlay"></div>
+    <div class="main">
+      <header class="topbar">
+        <button class="hamburger" id="hamburger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div class="greeting"><h1>Admin Reports</h1><p>High-level platform engagement snapshot</p></div>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
+        <button class="user-chip"><span class="ava" id="userAva">A</span><span class="u-meta"><span class="u-name" id="userName">Admin</span><span class="u-role">Administrator</span></span></button>
+      </header>
+      <div class="content">
+        <div id="adminReport" class="rise"></div>
+
+        <section class="rise" style="margin-top:22px">
+          <div class="block-head">
+            <div>
+              <h3>Export PDF Reports</h3>
+              <p>High-value admin packs — journal text is never included</p>
+            </div>
+            <div class="chart-toggle" id="engagementPeriod">
+              <button type="button" class="active" data-period="weekly">Weekly</button>
+              <button type="button" data-period="monthly">Monthly</button>
+            </div>
+          </div>
+          <div class="reports-grid" id="adminExportGrid">
+            <div class="report-card">
+              <span class="r-ic ic-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+              <h4>Platform Snapshot</h4>
+              <p>Users, activity totals, completion rates, and watchlist counts.</p>
+              <div class="r-foot"><span class="r-status">Ready</span><button type="button" class="btn btn-outline" data-export="snapshot" style="padding:6px 12px;font-size:0.8rem">Export PDF</button></div>
+            </div>
+            <div class="report-card">
+              <span class="r-ic ic-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></span>
+              <h4>Engagement Pack</h4>
+              <p>Active users, daily check-ins & reflections, growth for the selected period.</p>
+              <div class="r-foot"><span class="r-status">Ready</span><button type="button" class="btn btn-outline" data-export="engagement" style="padding:6px 12px;font-size:0.8rem">Export PDF</button></div>
+            </div>
+            <div class="report-card">
+              <span class="r-ic ic-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span>
+              <h4>Flagged Care Summary</h4>
+              <p>Attention signals, risk, watchlist, and trigger reasons — no journal text.</p>
+              <div class="r-foot"><span class="r-status">Ready</span><button type="button" class="btn btn-outline" data-export="flagged" style="padding:6px 12px;font-size:0.8rem">Export PDF</button></div>
+            </div>
+            <div class="report-card">
+              <span class="r-ic ic-violet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+              <h4>User Cohort Summary</h4>
+              <p>Counts by risk band, account status, roles, and recent signups.</p>
+              <div class="r-foot"><span class="r-status">Ready</span><button type="button" class="btn btn-outline" data-export="cohort" style="padding:6px 12px;font-size:0.8rem">Export PDF</button></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="form-actions" style="margin-top:16px">
+          <button type="button" class="btn btn-ghost" id="adminPrintBtn">Print page</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"><span class="t-ic">✓</span><span id="toastMsg">OK</span></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/shell.js"></script>
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>

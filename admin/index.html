@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — Lighthouse</title>
+  <script>
+    // /admin (no slash) makes relative links resolve to /users.html → 404
+    if (/\/admin\/?$/.test(location.pathname)) {
+      history.replaceState(null, '', '/admin/index.html' + location.search + location.hash);
+    }
+  </script>
+  <script src="../assets/js/theme.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <link rel="stylesheet" href="../assets/css/dashboard.css" />
+  <link rel="stylesheet" href="../assets/css/theme-dark.css" />
+</head>
+<body class="dash" data-admin-page="dashboard">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="/admin/index.html" class="brand"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.5 3M12 2 10.5 5"/><path d="M8.5 9h7l1.5 12h-10z"/></svg></span> Lighthouse Admin</a>
+      <div class="side-label">Admin</div>
+      <nav class="side-nav">
+        <a href="/admin/index.html" class="active">Dashboard</a>
+        <a href="/admin/users.html">Users</a>
+        <a href="/admin/scenarios.html">Scenarios</a>
+        <a href="/admin/reports.html">Reports</a>
+        <a href="/admin/analytics.html">Analytics</a>
+        <a href="/admin/settings.html">Settings</a>
+      </nav>
+      <div class="side-foot"><button class="logout-btn" id="logoutBtn">Log out</button></div>
+    </aside>
+    <div class="overlay" id="overlay"></div>
+    <div class="main">
+      <header class="topbar">
+        <button class="hamburger" id="hamburger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div class="greeting"><h1>Admin Dashboard</h1><p>Platform monitoring and wellbeing engagement</p></div>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
+        <button class="user-chip"><span class="ava" id="userAva">A</span><span class="u-meta"><span class="u-name" id="userName">Admin</span><span class="u-role">Administrator</span></span></button>
+      </header>
+      <div class="content">
+        <section class="stats-grid" id="adminStats" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))"></section>
+        <section class="charts-2">
+          <div class="card card-pad"><div class="block-head"><div><h3>User Growth</h3></div></div><div class="chart-canvas-wrap"><canvas id="growthChart"></canvas></div></div>
+          <div class="card card-pad"><div class="block-head"><div><h3>Daily Activity</h3></div></div><div class="chart-canvas-wrap"><canvas id="activityChart"></canvas></div></div>
+        </section>
+        <section class="card card-pad">
+          <div class="block-head"><div><h3>Flagged Users</h3><p>Attention indicators only — private journal text is hidden</p></div><a class="link-more" href="/admin/users.html">Manage users</a></div>
+          <div class="admin-table-wrap">
+            <table class="data-table"><thead><tr><th>User</th><th>Last Activity</th><th>Risk</th><th>Status</th><th>Check-ins</th><th>Reflections</th></tr></thead>
+            <tbody id="flaggedBody"></tbody></table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"><span class="t-ic">✓</span><span id="toastMsg">OK</span></div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/shell.js"></script>
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>

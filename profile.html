@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile — Lighthouse</title>
+  <script src="assets/js/theme.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/theme-dark.css" />
+</head>
+<body class="dash">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="brand"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.5 3M12 2 10.5 5"/><path d="M8.5 9h7l1.5 12h-10z"/></svg></span> Lighthouse</a>
+      <div class="side-label">Menu</div>
+      <nav class="side-nav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="checkins.html">Daily Check-ins</a>
+        <a href="journal.html">Reflection Journal</a>
+        <a href="insights.html">Insights</a>
+        <a href="reports.html">Reports</a>
+        <a href="profile.html" class="active">Profile</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+
+      <div class="side-foot"><button class="logout-btn" id="logoutBtn">Log out</button></div>
+    </aside>
+    <div class="overlay" id="overlay"></div>
+    <div class="main">
+      <header class="topbar">
+        <button class="hamburger" id="hamburger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div class="greeting"><h1>Profile</h1><p>Your account and activity overview</p></div>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
+        <button class="user-chip"><span class="ava" id="userAva">U</span><span class="u-meta"><span class="u-name" id="userName">User</span><span class="u-role">Personal account</span></span></button>
+      </header>
+      <div class="content">
+        <section class="card card-pad rise">
+          <div class="profile-hero">
+            <div class="profile-avatar" id="profileAvatar">U</div>
+            <div style="flex:1;min-width:220px">
+              <div class="field"><label for="displayName">Display Name</label>
+                <div class="input-wrap" style="position:relative">
+                  <input type="text" id="displayName" style="width:100%;padding:12px 14px;border:1.5px solid var(--border-strong);border-radius:12px;background:var(--surface)" />
+                </div>
+              </div>
+              <div class="form-actions" style="justify-content:flex-start;margin-top:10px">
+                <label class="btn btn-ghost" style="cursor:pointer">Upload Photo<input type="file" id="avatarFile" accept="image/*" hidden /></label>
+                <button class="btn btn-primary" id="saveProfileBtn">Save Profile</button>
+              </div>
+            </div>
+            <div>
+              <p style="color:var(--text-muted);font-size:0.86rem">Email</p>
+              <p id="profileEmail" style="font-weight:700"></p>
+              <p style="color:var(--text-muted);font-size:0.86rem;margin-top:10px">Registered</p>
+              <p id="profileJoined" style="font-weight:700"></p>
+            </div>
+          </div>
+        </section>
+        <section class="profile-stats rise" id="profileStats"></section>
+        <section class="card card-pad rise" style="max-width:560px">
+          <div class="block-head"><div><h3>Change Password</h3><p>Updates your Supabase Auth password</p></div></div>
+          <div class="field"><label for="newPass">New Password</label>
+            <input type="password" id="newPass" minlength="6" style="width:100%;padding:12px 14px;border:1.5px solid var(--border-strong);border-radius:12px;background:var(--surface)" />
+          </div>
+          <div class="field"><label for="confirmPass">Confirm Password</label>
+            <input type="password" id="confirmPass" minlength="6" style="width:100%;padding:12px 14px;border:1.5px solid var(--border-strong);border-radius:12px;background:var(--surface)" />
+          </div>
+          <button class="btn btn-teal" id="changePassBtn">Update Password</button>
+        </section>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"><span class="t-ic">✓</span><span id="toastMsg">OK</span></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/shell.js"></script>
+  <script src="assets/js/profile.js"></script>
+</body>
+</html>
