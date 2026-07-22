@@ -29,7 +29,7 @@ Built as a static frontend (HTML / CSS / JS) on **Supabase** (Auth + Postgres + 
 | Layer | Choice |
 |--------|--------|
 | UI | HTML, CSS, vanilla JS |
-| Charts | Chart.js (CDN) |
+| Charts | Chart.js |
 | Auth & DB | Supabase Auth + Postgres |
 | PDF | jsPDF (CDN) |
 | Hosting | Any static host / local HTTP server |
