@@ -46,7 +46,7 @@
                 </div>
               </div>
               <div class="form-actions" style="justify-content:flex-start;margin-top:10px">
-                <label class="btn btn-ghost" style="cursor:pointer">Upload Photo<input type="file" id="avatarFile" accept="image/*" hidden /></label>
+                <label class="btn btn-ghost" style="cursor:pointer">Upload Photo<input type="file" id="avatarFile" accept="image/jpeg,image/png,image/webp" hidden /></label>
                 <button class="btn btn-primary" id="saveProfileBtn">Save Profile</button>
               </div>
             </div>
@@ -58,6 +58,87 @@
             </div>
           </div>
         </section>
+
+        <section class="card card-pad rise" style="max-width:720px">
+          <div class="block-head"><div><h3>About you</h3><p>Profile details collected at sign-up — you can update them anytime</p></div></div>
+
+          <div class="field">
+            <label for="profileOccupation">Occupation</label>
+            <select id="profileOccupation">
+              <option value="">Select occupation…</option>
+              <option value="Student">Student</option>
+              <option value="Teacher">Teacher</option>
+              <option value="Employee">Employee</option>
+              <option value="Freelancer">Freelancer</option>
+              <option value="Self-Employed">Self-Employed</option>
+              <option value="Unemployed">Unemployed</option>
+              <option value="Retired">Retired</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field" id="profileCustomOccupationWrap" hidden>
+            <label for="profileCustomOccupation">Please specify your occupation</label>
+            <input type="text" id="profileCustomOccupation" placeholder="Your occupation" />
+          </div>
+
+          <div class="field">
+            <label>Interests</label>
+            <div class="choice-grid" id="profileInterests" role="group" aria-label="Interests">
+              <label class="choice-chip"><input type="checkbox" name="profileInterest" value="Reading" /> Reading</label>
+              <label class="choice-chip"><input type="checkbox" name="profileInterest" value="Music" /> Music</label>
+              <label class="choice-chip"><input type="checkbox" name="profileInterest" value="Sports" /> Sports</label>
+              <label class="choice-chip"><input type="checkbox" name="profileInterest" value="Gaming" /> Gaming</label>
+              <label class="choice-chip"><input type="checkbox" name="profileInterest" value="Traveling" /> Traveling</label>
+              <label class="choice-chip"><input type="checkbox" name="profileInterest" value="Coding" /> Coding</label>
+              <label class="choice-chip"><input type="checkbox" name="profileInterest" value="Meditation" /> Meditation</label>
+              <label class="choice-chip"><input type="checkbox" name="profileInterest" value="Exercise" /> Exercise</label>
+              <label class="choice-chip"><input type="checkbox" name="profileInterest" value="Photography" /> Photography</label>
+              <label class="choice-chip"><input type="checkbox" name="profileInterest" value="Movies" /> Movies</label>
+              <label class="choice-chip"><input type="checkbox" name="profileInterest" value="Art" /> Art</label>
+              <label class="choice-chip"><input type="checkbox" name="profileInterest" value="Cooking" /> Cooking</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="profilePhone">Phone Number</label>
+            <input type="tel" id="profilePhone" placeholder="+1 555 000 0000" autocomplete="tel" />
+          </div>
+
+          <div class="field">
+            <label for="profileDob">Date of Birth <span class="field-hint">(dd/mm/yy)</span></label>
+            <input type="text" id="profileDob" placeholder="dd/mm/yy" inputmode="numeric" autocomplete="bday" maxlength="8" />
+          </div>
+
+          <div class="field">
+            <label>Gender</label>
+            <div class="radio-row" role="radiogroup" aria-label="Gender">
+              <label class="radio-pill"><input type="radio" name="profileGender" value="Male" /> Male</label>
+              <label class="radio-pill"><input type="radio" name="profileGender" value="Female" /> Female</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="profileHeardAbout">How did you hear about Lighthouse?</label>
+            <select id="profileHeardAbout">
+              <option value="">Select an option…</option>
+              <option value="Friend">Friend</option>
+              <option value="University">University</option>
+              <option value="Social Media">Social Media</option>
+              <option value="Google Search">Google Search</option>
+              <option value="Advertisement">Advertisement</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="profileBio">Short Bio</label>
+            <textarea id="profileBio" rows="3" maxlength="250" placeholder="A short introduction about you…"></textarea>
+            <div class="char-count"><span id="profileBioCount">0</span> / 250</div>
+          </div>
+
+          <button class="btn btn-teal" type="button" id="saveAboutBtn">Save About You</button>
+        </section>
+
         <section class="profile-stats rise" id="profileStats"></section>
         <section class="card card-pad rise" style="max-width:560px">
           <div class="block-head"><div><h3>Change Password</h3><p>Updates your Supabase Auth password</p></div></div>

@@ -78,11 +78,24 @@
       if (map[key].tab) map[key].tab.classList.toggle('active', active);
       if (map[key].form) map[key].form.classList.toggle('active', active);
     });
+    // Longer signup form: anchor to the top of the auth section (page scroll, not card scroll)
+    if (which === 'signup') {
+      const auth = $('#auth');
+      if (auth) {
+        requestAnimationFrame(() => {
+          auth.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+    }
   }
 
   $$('[data-tab]').forEach((btn) =>
     btn.addEventListener('click', () => setTab(btn.dataset.tab))
   );
+
+  $$('.terms-link').forEach((link) => {
+    link.addEventListener('click', (e) => e.stopPropagation());
+  });
 
   $$('[data-auth]').forEach((btn) =>
     btn.addEventListener('click', () => {
@@ -153,9 +166,139 @@
     }
   }
 
-  $$('.auth-form input').forEach((input) =>
-    input.addEventListener('input', () => setError(input.id, false))
+  $$('.auth-form input, .auth-form select, .auth-form textarea').forEach((input) =>
+    input.addEventListener('input', () => {
+      if (input.id) setError(input.id, false);
+      if (input.name === 'interest') setError('signupInterests', false);
+      if (input.name === 'signupGender') setError('signupGender', false);
+    })
   );
+  $$('.auth-form select').forEach((sel) =>
+    sel.addEventListener('change', () => { if (sel.id) setError(sel.id, false); })
+  );
+
+  /* ------------------------------------------- Signup extended fields UX -- */
+  const occupationSelect = $('#signupOccupation');
+  const customOccWrap = $('#signupCustomOccupationWrap');
+  const customOccInput = $('#signupCustomOccupation');
+  const bioInput = $('#signupBio');
+  const bioCount = $('#signupBioCount');
+  const avatarInput = $('#signupAvatar');
+  const avatarPreview = $('#signupAvatarPreview');
+  let signupAvatarDataUrl = null;
+
+  const phoneRe = /^[+]?[\d\s().-]{7,20}$/;
+  const ALLOWED_AVATAR = ['image/jpeg', 'image/png', 'image/webp'];
+
+  function maskDobInput(value) {
+    const digits = String(value || '').replace(/\D/g, '').slice(0, 6);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+  }
+
+  function formatDobDisplay(iso) {
+    const s = String(iso || '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return '';
+    const [y, m, d] = s.split('-');
+    return `${d}/${m}/${y.slice(-2)}`;
+  }
+
+  function parseDobInput(raw) {
+    const s = String(raw || '').trim();
+    if (!s) return { ok: true, iso: null };
+    const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+    if (!m) return { ok: false, error: 'Enter a valid date as dd/mm/yy.' };
+    const day = parseInt(m[1], 10);
+    const month = parseInt(m[2], 10);
+    const two = parseInt(m[3], 10);
+    const now = new Date();
+    const pivot = now.getFullYear() % 100;
+    const year = two <= pivot ? 2000 + two : 1900 + two;
+    const dt = new Date(year, month - 1, day);
+    if (dt.getFullYear() !== year || dt.getMonth() !== month - 1 || dt.getDate() !== day) {
+      return { ok: false, error: 'Enter a valid calendar date as dd/mm/yy.' };
+    }
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (dt > today) {
+      return { ok: false, error: 'Date of birth cannot be in the future.' };
+    }
+    return {
+      ok: true,
+      iso: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+    };
+  }
+
+  const dobInput = $('#signupDob');
+  if (dobInput) {
+    dobInput.addEventListener('input', () => {
+      const next = maskDobInput(dobInput.value);
+      if (dobInput.value !== next) dobInput.value = next;
+      setError('signupDob', false);
+    });
+  }
+
+  function syncCustomOccupation() {
+    const isOther = occupationSelect && occupationSelect.value === 'Other';
+    if (customOccWrap) customOccWrap.hidden = !isOther;
+    if (!isOther && customOccInput) {
+      customOccInput.value = '';
+      setError('signupCustomOccupation', false);
+    }
+  }
+  if (occupationSelect) {
+    occupationSelect.addEventListener('change', syncCustomOccupation);
+    syncCustomOccupation();
+  }
+
+  if (bioInput && bioCount) {
+    const syncBio = () => { bioCount.textContent = String(bioInput.value.length); };
+    bioInput.addEventListener('input', syncBio);
+    syncBio();
+  }
+
+  function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      if (!file) return resolve(null);
+      if (!ALLOWED_AVATAR.includes(file.type)) {
+        return reject(new Error('Please choose a JPG, PNG, or WEBP image.'));
+      }
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('Could not read image.'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if (avatarInput) {
+    avatarInput.addEventListener('change', async () => {
+      const file = avatarInput.files && avatarInput.files[0];
+      setError('signupAvatar', false);
+      if (!file) {
+        signupAvatarDataUrl = null;
+        if (avatarPreview) {
+          avatarPreview.style.backgroundImage = '';
+          avatarPreview.textContent = '?';
+        }
+        return;
+      }
+      try {
+        signupAvatarDataUrl = await fileToDataUrl(file);
+        if (avatarPreview) {
+          avatarPreview.style.backgroundImage = `url(${signupAvatarDataUrl})`;
+          avatarPreview.textContent = '';
+        }
+      } catch (err) {
+        signupAvatarDataUrl = null;
+        avatarInput.value = '';
+        if (avatarPreview) {
+          avatarPreview.style.backgroundImage = '';
+          avatarPreview.textContent = '?';
+        }
+        setError('signupAvatar', true, err.message || 'Invalid image.');
+      }
+    });
+  }
 
   function ensureConfigured() {
     if (!window.Lighthouse) {
@@ -246,7 +389,31 @@
     const email = $('#signupEmail').value.trim();
     const pass = $('#signupPassword').value;
     const confirm = $('#signupConfirm').value;
+    const occupation = occupationSelect ? occupationSelect.value : '';
+    const customOccupation = customOccInput ? customOccInput.value.trim() : '';
+    const interests = $$('#signupInterests input[name="interest"]:checked').map((el) => el.value);
+    const phone = ($('#signupPhone') && $('#signupPhone').value.trim()) || '';
+    const dobRaw = (dobInput && dobInput.value.trim()) || '';
+    const dobParsed = parseDobInput(dobRaw);
+    const genderEl = $('input[name="signupGender"]:checked');
+    const gender = genderEl ? genderEl.value : '';
+    const heardAbout = ($('#signupHeardAbout') && $('#signupHeardAbout').value) || '';
+    const bio = (bioInput && bioInput.value.trim()) || '';
+    const termsOk = $('#signupTerms') && $('#signupTerms').checked;
     let ok = true;
+
+    setError('signupName', false);
+    setError('signupEmail', false);
+    setError('signupPassword', false);
+    setError('signupConfirm', false);
+    setError('signupOccupation', false);
+    setError('signupCustomOccupation', false);
+    setError('signupInterests', false);
+    setError('signupPhone', false);
+    setError('signupDob', false);
+    setError('signupAvatar', false);
+    setError('signupBio', false);
+    setError('signupTerms', false);
 
     if (name.length < 2) {
       setError('signupName', true, 'Please enter your full name.');
@@ -264,6 +431,34 @@
       setError('signupConfirm', true, 'Passwords do not match.');
       ok = false;
     }
+    if (!occupation) {
+      setError('signupOccupation', true, 'Please select your occupation.');
+      ok = false;
+    }
+    if (occupation === 'Other' && customOccupation.length < 2) {
+      setError('signupCustomOccupation', true, 'Please specify your occupation.');
+      ok = false;
+    }
+    if (interests.length < 1) {
+      setError('signupInterests', true, 'Please select at least one interest.');
+      ok = false;
+    }
+    if (phone && !phoneRe.test(phone)) {
+      setError('signupPhone', true, 'Please enter a valid phone number.');
+      ok = false;
+    }
+    if (!dobParsed.ok) {
+      setError('signupDob', true, dobParsed.error);
+      ok = false;
+    }
+    if (bio.length > 250) {
+      setError('signupBio', true, 'Bio must be 250 characters or fewer.');
+      ok = false;
+    }
+    if (!termsOk) {
+      setError('signupTerms', true, 'Please accept the Terms & Conditions.');
+      ok = false;
+    }
     if (!ok) return;
 
     try {
@@ -273,6 +468,17 @@
         email,
         password: pass,
         fullName: name,
+        profile: {
+          phoneNumber: phone || null,
+          dateOfBirth: dobParsed.iso || null,
+          gender: gender || null,
+          occupation,
+          customOccupation: occupation === 'Other' ? customOccupation : null,
+          interests,
+          avatarUrl: signupAvatarDataUrl || null,
+          heardAbout: heardAbout || null,
+          shortBio: bio || null,
+        },
       });
 
       // If email confirmation is enabled in Supabase, session may be null.

@@ -119,6 +119,7 @@ Migrations in `supabase/` (run in order):
 | `schema_wellbeing.sql` | Check-ins, scenario bank + responses, visual reflections |
 | `schema_platform.sql` | Profiles (role, status), preferences, admin helpers |
 | `schema_care.sql` | Admin notes, user nudges, `monitoring_until` watchlist |
+| `schema_profile_extended.sql` | Signup profile fields (occupation, interests, phone, DOB, etc.) |
 
 `profiles.role` is either `user` or `admin`. Promoting an admin is a manual SQL update after signup.
 

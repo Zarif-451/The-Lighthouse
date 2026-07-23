@@ -148,13 +148,47 @@
     return user;
   }
 
-  async function signUp({ email, password, fullName }) {
+  async function signUp({ email, password, fullName, profile }) {
+    const p = profile || {};
+    const meta = {
+      full_name: fullName,
+      phone_number: p.phoneNumber || '',
+      date_of_birth: p.dateOfBirth || '',
+      gender: p.gender || '',
+      occupation: p.occupation || '',
+      custom_occupation: p.customOccupation || '',
+      interests: Array.isArray(p.interests) ? p.interests : [],
+      heard_about: p.heardAbout || '',
+      short_bio: p.shortBio || '',
+    };
     const { data, error } = await getClient().auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: { data: meta },
     });
     if (error) throw error;
+
+    // When a session exists immediately, persist profile fields to the table as well
+    // (covers older handle_new_user triggers that only store display_name).
+    if (data && data.session && data.user) {
+      try {
+        await ensureProfile(data.user);
+        await updateProfile({
+          displayName: fullName,
+          phoneNumber: p.phoneNumber || null,
+          dateOfBirth: p.dateOfBirth || null,
+          gender: p.gender || null,
+          occupation: p.occupation || null,
+          customOccupation: p.customOccupation || null,
+          interests: Array.isArray(p.interests) ? p.interests : [],
+          avatarUrl: p.avatarUrl || null,
+          heardAbout: p.heardAbout || null,
+          shortBio: p.shortBio || null,
+        });
+      } catch (e) {
+        /* Profile row may still be created by trigger; signup auth succeeded */
+      }
+    }
     return data;
   }
 
@@ -776,12 +810,54 @@
     return created;
   }
 
-  async function updateProfile({ displayName, avatarUrl }) {
+  async function updateProfile({
+    displayName,
+    avatarUrl,
+    phoneNumber,
+    dateOfBirth,
+    gender,
+    occupation,
+    customOccupation,
+    interests,
+    heardAbout,
+    shortBio,
+  } = {}) {
     const user = await getUser();
     if (!user) throw new Error('Not signed in.');
     const patch = { updated_at: new Date().toISOString() };
     if (displayName != null) patch.display_name = String(displayName).trim();
-    if (avatarUrl != null) patch.avatar_url = avatarUrl;
+    if (avatarUrl !== undefined) patch.avatar_url = avatarUrl || null;
+    if (phoneNumber !== undefined) {
+      const v = phoneNumber == null ? '' : String(phoneNumber).trim();
+      patch.phone_number = v || null;
+    }
+    if (dateOfBirth !== undefined) {
+      const v = dateOfBirth == null ? '' : String(dateOfBirth).trim();
+      patch.date_of_birth = v || null;
+    }
+    if (gender !== undefined) {
+      const v = gender == null ? '' : String(gender).trim();
+      patch.gender = v || null;
+    }
+    if (occupation !== undefined) {
+      const v = occupation == null ? '' : String(occupation).trim();
+      patch.occupation = v || null;
+    }
+    if (customOccupation !== undefined) {
+      const v = customOccupation == null ? '' : String(customOccupation).trim();
+      patch.custom_occupation = v || null;
+    }
+    if (interests !== undefined) {
+      patch.interests = Array.isArray(interests) ? interests : [];
+    }
+    if (heardAbout !== undefined) {
+      const v = heardAbout == null ? '' : String(heardAbout).trim();
+      patch.heard_about = v || null;
+    }
+    if (shortBio !== undefined) {
+      const v = shortBio == null ? '' : String(shortBio).trim();
+      patch.short_bio = v || null;
+    }
     const { data, error } = await getClient()
       .from('profiles')
       .update(patch)
