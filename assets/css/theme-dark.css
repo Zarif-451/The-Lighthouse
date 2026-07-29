@@ -9,14 +9,14 @@ html[data-theme="dark"] {
   --primary: #3B82F6;
   --primary-600: #60a5fa;
   --primary-700: #2563eb;
-  --primary-050: rgba(59, 130, 246, 0.14);
+  --primary-050: rgba(59, 130, 246, 0.18);
 
   --secondary: #14B8A6;
   --secondary-600: #2dd4bf;
-  --secondary-050: rgba(20, 184, 166, 0.14);
+  --secondary-050: rgba(20, 184, 166, 0.16);
 
   --accent: #F59E0B;
-  --accent-050: rgba(245, 158, 11, 0.14);
+  --accent-050: rgba(245, 158, 11, 0.16);
 
   --white: #1E293B;
   --bg: #0F172A;
@@ -25,7 +25,7 @@ html[data-theme="dark"] {
   --border: rgba(148, 163, 184, 0.18);
   --border-strong: rgba(148, 163, 184, 0.28);
 
-  --text: #FFFFFF;
+  --text: #F8FAFC;
   --text-soft: #CBD5E1;
   --text-muted: #94A3B8;
 
@@ -62,6 +62,7 @@ html[data-theme="dark"] .topbar {
   border-bottom-color: var(--border);
 }
 
+/* Surfaces that previously hard-coded light backgrounds */
 html[data-theme="dark"] .search input,
 html[data-theme="dark"] .icon-btn,
 html[data-theme="dark"] .user-chip,
@@ -71,10 +72,13 @@ html[data-theme="dark"] .btn-ghost,
 html[data-theme="dark"] .btn-outline,
 html[data-theme="dark"] .field input,
 html[data-theme="dark"] .field select,
+html[data-theme="dark"] .field textarea,
 html[data-theme="dark"] .checkin-form input,
 html[data-theme="dark"] .checkin-form select,
 html[data-theme="dark"] .checkin-form textarea,
 html[data-theme="dark"] .journal-textarea,
+html[data-theme="dark"] .word-puzzle-input,
+html[data-theme="dark"] .care-textarea,
 html[data-theme="dark"] .auth-card,
 html[data-theme="dark"] .card,
 html[data-theme="dark"] .stat,
@@ -92,17 +96,92 @@ html[data-theme="dark"] .summary-item,
 html[data-theme="dark"] .empty-state,
 html[data-theme="dark"] .option-card,
 html[data-theme="dark"] .data-table,
-html[data-theme="dark"] .admin-table-wrap {
+html[data-theme="dark"] .admin-table-wrap,
+html[data-theme="dark"] .compare-card,
+html[data-theme="dark"] .settings-row,
+html[data-theme="dark"] .summary-chip,
+html[data-theme="dark"] .journey-transition-card,
+html[data-theme="dark"] .legal-doc,
+html[data-theme="dark"] .choice-chip,
+html[data-theme="dark"] .radio-pill,
+html[data-theme="dark"] .auth-tabs button.active {
   background: var(--surface);
   color: var(--text);
   border-color: var(--border);
 }
 
+html[data-theme="dark"] .btn-ghost {
+  color: var(--primary-600);
+}
+html[data-theme="dark"] .btn-outline {
+  background: transparent;
+  color: var(--text);
+}
+html[data-theme="dark"] .auth-tabs button.active {
+  color: var(--primary-600);
+}
+html[data-theme="dark"] .choice-chip,
+html[data-theme="dark"] .radio-pill {
+  color: var(--text-soft);
+}
+html[data-theme="dark"] .choice-chip:has(input:checked),
+html[data-theme="dark"] .radio-pill:has(input:checked) {
+  background: var(--secondary-050);
+  border-color: var(--secondary);
+  color: var(--text);
+}
+
 html[data-theme="dark"] .care-block,
-html[data-theme="dark"] .care-note {
+html[data-theme="dark"] .care-note,
+html[data-theme="dark"] .mk-stat,
+html[data-theme="dark"] .mk-chart,
+html[data-theme="dark"] .auth-tabs,
+html[data-theme="dark"] .progress,
+html[data-theme="dark"] .progress-bar-track,
+html[data-theme="dark"] .journey-step,
+html[data-theme="dark"] .insight-empty,
+html[data-theme="dark"] .memory-tile {
+  background: var(--bg-soft);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+html[data-theme="dark"] .reaction-arena {
   background: var(--bg-soft);
   border-color: var(--border);
 }
+html[data-theme="dark"] .reaction-arena.wait { background: #0f172a; color: #e2e8f0; }
+html[data-theme="dark"] .reaction-arena.go { background: #14b8a6; color: #fff; }
+html[data-theme="dark"] .reaction-arena.early { background: #f59e0b; color: #fff; }
+
+html[data-theme="dark"] .journey-step:hover,
+html[data-theme="dark"] .option-card:hover,
+html[data-theme="dark"] .summary-item:hover,
+html[data-theme="dark"] .reflect-card:hover {
+  background: var(--surface);
+}
+
+html[data-theme="dark"] .journey-step .js-check,
+html[data-theme="dark"] .chart-toggle button.active {
+  background: var(--surface);
+  border-color: var(--border-strong);
+}
+html[data-theme="dark"] .chart-toggle button.active {
+  color: var(--primary-600);
+}
+html[data-theme="dark"] .journey-step.done .js-check {
+  background: var(--secondary-050);
+  border-color: var(--secondary);
+  color: var(--secondary-600);
+}
+
+html[data-theme="dark"] .flow-banner {
+  border-color: rgba(20, 184, 166, 0.4);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(20, 184, 166, 0.14));
+  color: var(--text);
+}
+html[data-theme="dark"] .flow-banner strong { color: var(--text); }
+html[data-theme="dark"] .flow-banner p { color: var(--text-soft); }
 
 html[data-theme="dark"] .watch-pill {
   background: rgba(96,165,250,0.18);
@@ -115,6 +194,15 @@ html[data-theme="dark"] .demo-badge {
   border-color: rgba(245, 158, 11, 0.35);
 }
 
+html[data-theme="dark"] .risk-pill.low { color: #34d399; }
+html[data-theme="dark"] .risk-pill.moderate { color: #fbbf24; }
+html[data-theme="dark"] .risk-pill.high { color: #f87171; }
+
+html[data-theme="dark"] .status-chip.good {
+  color: var(--secondary-600);
+  background: var(--secondary-050);
+}
+
 html[data-theme="dark"] .analytics-mode {
   background: var(--surface);
   border-color: var(--border);
@@ -122,22 +210,17 @@ html[data-theme="dark"] .analytics-mode {
 html[data-theme="dark"] .analytics-mode button {
   color: var(--text-muted);
 }
+html[data-theme="dark"] .analytics-mode button.active {
+  color: #fff;
+}
 
 html[data-theme="dark"] .nudge-banner {
   border-color: rgba(20,184,166,0.4);
   background: linear-gradient(135deg, rgba(20,184,166,0.16), rgba(59,130,246,0.1));
+  color: var(--text);
 }
-
-html[data-theme="dark"] .mk-stat,
-html[data-theme="dark"] .mk-chart,
-html[data-theme="dark"] .auth-tabs,
-html[data-theme="dark"] .progress,
-html[data-theme="dark"] .progress-bar-track,
-html[data-theme="dark"] .journey-step,
-html[data-theme="dark"] .insight-empty {
-  background: var(--bg-soft);
-  border-color: var(--border);
-}
+html[data-theme="dark"] .nudge-body strong { color: var(--text); }
+html[data-theme="dark"] .nudge-body p { color: var(--text-soft); }
 
 html[data-theme="dark"] .footer {
   background: #020617;
@@ -146,7 +229,86 @@ html[data-theme="dark"] .footer {
 html[data-theme="dark"] .theme-toggle {
   border-color: var(--border);
   background: var(--surface);
+  color: var(--text-soft);
+}
+
+html[data-theme="dark"] .range-val {
+  background: var(--primary-050);
+  color: var(--primary-600);
+}
+
+html[data-theme="dark"] .progress-count {
+  color: var(--primary-600);
+}
+
+html[data-theme="dark"] .scrambled-word {
+  color: var(--primary-600);
+}
+
+html[data-theme="dark"] .data-table th,
+html[data-theme="dark"] .data-table td {
+  border-color: var(--border);
   color: var(--text);
+}
+html[data-theme="dark"] .data-table th {
+  color: var(--text-muted);
+}
+
+html[data-theme="dark"] .sidebar .side-label {
+  color: #94a3b8;
+}
+html[data-theme="dark"] .side-nav a {
+  color: #cbd5e1;
+}
+html[data-theme="dark"] .side-card p,
+html[data-theme="dark"] .logout-btn {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .field input::placeholder,
+html[data-theme="dark"] .field textarea::placeholder,
+html[data-theme="dark"] .journal-textarea::placeholder,
+html[data-theme="dark"] .checkin-form input::placeholder,
+html[data-theme="dark"] .checkin-form textarea::placeholder,
+html[data-theme="dark"] .care-textarea::placeholder,
+html[data-theme="dark"] .word-puzzle-input::placeholder,
+html[data-theme="dark"] .search input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+html[data-theme="dark"] .opt-text,
+html[data-theme="dark"] .scenario-question,
+html[data-theme="dark"] .page-head h1,
+html[data-theme="dark"] .page-head h2,
+html[data-theme="dark"] .block-head h3,
+html[data-theme="dark"] .settings-row h4,
+html[data-theme="dark"] .compare-card .cc-val,
+html[data-theme="dark"] .stat .s-val,
+html[data-theme="dark"] .user-chip .u-name,
+html[data-theme="dark"] .topbar .greeting h2,
+html[data-theme="dark"] .legal-doc h1,
+html[data-theme="dark"] .legal-doc h2,
+html[data-theme="dark"] .auth-form h3,
+html[data-theme="dark"] .section-head h2 {
+  color: var(--text);
+}
+
+html[data-theme="dark"] .scenario-story,
+html[data-theme="dark"] .page-head p,
+html[data-theme="dark"] .block-head p,
+html[data-theme="dark"] .legal-doc p,
+html[data-theme="dark"] .legal-doc li,
+html[data-theme="dark"] .terms-check,
+html[data-theme="dark"] .auth-row label {
+  color: var(--text-soft);
+}
+
+/* Native controls follow dark scheme */
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  color-scheme: dark;
 }
 
 .theme-toggle {

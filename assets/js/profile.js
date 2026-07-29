@@ -126,6 +126,29 @@
       $('#profileStats').innerHTML = `<div class="insight-empty">Not enough data yet.</div>`;
     }
 
+    try {
+      const act = await window.Lighthouse.getActivityStats();
+      const favLabels = { memory: 'Memory Challenge', word_puzzle: 'Word Puzzle', reaction: 'Reaction Challenge' };
+      const el = $('#activitySummary');
+      if (el) {
+        if (!act.totalCompleted) {
+          el.innerHTML = `<div class="insight-empty">Complete more activities to unlock this insight.</div>`;
+        } else {
+          el.innerHTML = [
+            ['Activities Completed', act.totalCompleted],
+            ['Favorite Activity', favLabels[act.favorite] || act.favorite || '—'],
+            ['Current Streak', `${act.streak || 0} day(s)`],
+            ['Last Activity', act.lastActivityDate || '—'],
+            ['Memory Accuracy', act.memoryAvgAccuracy != null ? `${act.memoryAvgAccuracy}%` : '—'],
+            ['Reaction Avg', act.reactionAvgMs != null ? `${act.reactionAvgMs} ms` : '—'],
+          ].map(([l, v]) => `<div class="compare-card"><div class="cc-label">${l}</div><div class="cc-val" style="font-size:1.1rem">${v}</div></div>`).join('');
+        }
+      }
+    } catch (e) {
+      const el = $('#activitySummary');
+      if (el) el.innerHTML = `<div class="insight-empty">Complete more activities to unlock this insight.</div>`;
+    }
+
     if ($('#profileOccupation')) {
       $('#profileOccupation').addEventListener('change', syncCustomOccupation);
     }

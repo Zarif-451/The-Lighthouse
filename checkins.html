@@ -71,7 +71,7 @@
         <div class="flow-banner rise" id="flowBanner" hidden>
           <div>
             <strong>Today’s wellbeing journey</strong>
-            <p>Step 1 of 4 — after saving, you’ll continue to Scenario Assessment automatically.</p>
+            <p>Step 1 of 11 — after saving, you’ll continue to the next journey step automatically.</p>
           </div>
         </div>
 
@@ -94,11 +94,11 @@
                 <label for="mood">Mood</label>
                 <select id="mood" required>
                   <option value="">Select mood</option>
-                  <option>Very Low</option>
-                  <option>Low</option>
-                  <option>Neutral</option>
-                  <option>Good</option>
-                  <option>Excellent</option>
+                  <option value="Very Low">😫 Very Low</option>
+                  <option value="Low">😕 Low</option>
+                  <option value="Neutral">😐 Neutral</option>
+                  <option value="Good">🙂 Good</option>
+                  <option value="Excellent">🤩 Excellent</option>
                 </select>
               </div>
               <div class="field">
@@ -157,6 +157,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/journey.js"></script>
   <script src="assets/js/shell.js"></script>
   <script src="assets/js/checkins.js"></script>
 </body>

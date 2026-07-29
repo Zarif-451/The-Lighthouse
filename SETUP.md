@@ -11,6 +11,8 @@ Edit `assets/js/config.js` with your Project URL and anon key.
 3. `supabase/schema_platform.sql` — profiles, preferences, admin RLS, scenario `is_active`  
 4. `supabase/schema_care.sql` — admin notes, soft nudges, watchlist (`monitoring_until`)
 5. `supabase/schema_profile_extended.sql` — signup profile fields (phone, DOB, gender, occupation, interests, bio, etc.)
+6. `supabase/schema_journey_extended.sql` — 5 scenarios/day, daily picks, behavioral activities  
+7. `supabase/seed_scenarios_extended.sql` — expands scenario bank (~80 additional scenarios)
 
 ## Admin access (same page as user login)
 

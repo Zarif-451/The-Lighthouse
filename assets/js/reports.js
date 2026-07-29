@@ -17,6 +17,10 @@
       ['Avg Productivity', report.prodAvg != null ? report.prodAvg + '/5' : '—'],
       ['Scenario Completion', report.scenarioCount],
       ['Visual Reflections', report.visualCount],
+      ['Behavioral Activities', report.activityCount != null ? report.activityCount : '—'],
+      ['Memory Accuracy', report.memoryAvgAccuracy != null ? report.memoryAvgAccuracy + '%' : '—'],
+      ['Reaction Avg', report.reactionAvgMs != null ? report.reactionAvgMs + ' ms' : '—'],
+      ['Word Puzzles', report.wordPuzzleCount != null ? report.wordPuzzleCount : '—'],
       ['Overall Engagement', report.enough ? report.engagement + '%' : '—'],
     ];
     $('#reportCards').innerHTML = cards.map(([l, v]) => `

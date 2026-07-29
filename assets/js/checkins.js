@@ -89,7 +89,7 @@
           <div class="journal-meta">
             <span class="journal-date">${LH.escapeHtml(r.checkin_date)}</span>
             <span class="journal-dot">·</span>
-            <span class="journal-time">${LH.escapeHtml(r.mood)} · Sleep ${LH.escapeHtml(String(r.sleep_hours))}h</span>
+            <span class="journal-time">${LH.escapeHtml(LH.moodLabel ? LH.moodLabel(r.mood) : r.mood)} · Sleep ${LH.escapeHtml(String(r.sleep_hours))}h</span>
           </div>
           <button type="button" class="journal-delete" data-id="${LH.escapeHtml(r.id)}" aria-label="Delete check-in" title="Delete">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
@@ -132,9 +132,18 @@
       showToast(result.created ? 'Check-in saved.' : 'Check-in updated.');
       await refresh();
 
-      // Guided journey: continue to scenario after save
+      // After check-in → always go to Scenario 1
+      const goScenario1 = window.LighthouseJourney.hrefFor('scenario_1');
       if (inFlow() || result.created) {
-        setTimeout(() => { window.location.href = 'scenario.html?flow=1'; }, 700);
+        window.LighthouseJourney.showTransitionThen('checkin', goScenario1, { force: true });
+      } else {
+        // Even outside flow, if Scenario 1 is still pending, continue the journey
+        try {
+          const progress = await window.Lighthouse.getTodaysProgress();
+          if (progress && !progress.steps.scenario_1) {
+            window.LighthouseJourney.showTransitionThen('checkin', goScenario1, { force: true });
+          }
+        } catch (e) { /* ignore */ }
       }
     } catch (err) {
       const msg = (err && err.message) || 'Could not save check-in.';

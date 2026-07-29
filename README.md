@@ -98,7 +98,9 @@ In **Supabase → SQL Editor**, run:
 2. `supabase/schema_wellbeing.sql` — check-ins, scenarios, visual reflections  
 3. `supabase/schema_platform.sql` — profiles, preferences, admin RLS  
 4. `supabase/schema_care.sql` — admin notes, nudges, watchlist
-5. `supabase/schema_profile_extended.sql` — extended signup profile fields  
+5. `supabase/schema_profile_extended.sql` — extended signup profile fields
+6. `supabase/schema_journey_extended.sql` — 5 scenarios/day + behavioral activities
+7. `supabase/seed_scenarios_extended.sql` — ~80 additional scenarios  
 
 ### 3. Serve over HTTP
 

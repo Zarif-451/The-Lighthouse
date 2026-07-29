@@ -82,8 +82,26 @@
         imageCategory: selectedId,
         optionalNote: $('#visualNote').value,
       });
-      showToast('Visual reflection saved. Continuing…');
-      setTimeout(() => { window.location.href = 'journal.html?flow=1'; }, 700);
+      // After Visual Reflection → always go to Scenario 3
+      const goScenario3 = window.LighthouseJourney.hrefFor('scenario_3');
+      if (window.Lighthouse.isFlowMode()) {
+        window.LighthouseJourney.showTransitionThen('visual', goScenario3, { force: true });
+      } else {
+        try {
+          const progress = await window.Lighthouse.getTodaysProgress();
+          if (progress && progress.steps.visual && !progress.steps.scenario_3) {
+            window.LighthouseJourney.showTransitionThen('visual', goScenario3, { force: true });
+          } else {
+            showToast('Visual reflection saved.');
+            $('#saveVisualBtn').disabled = false;
+            $('#saveVisualBtn').textContent = 'Update & Continue';
+          }
+        } catch (e) {
+          showToast('Visual reflection saved.');
+          $('#saveVisualBtn').disabled = false;
+          $('#saveVisualBtn').textContent = 'Update & Continue';
+        }
+      }
     } catch (err) {
       const msg = (err && err.message) || 'Could not save.';
       setHint(msg, true);
@@ -117,13 +135,26 @@
       $('#userAva').textContent = window.Lighthouse.initialsFromName(name);
 
       const progress = await window.Lighthouse.getTodaysProgress();
-      if (!progress.steps.scenario) {
-        showToast('Complete today’s scenario assessment first.');
-        setTimeout(() => { window.location.href = 'scenario.html?flow=1'; }, 900);
-        return;
-      }
+      const allowed = await window.LighthouseJourney.enforceStepAccess('visual', { showToast });
+      if (!allowed) return;
 
       const existing = await window.Lighthouse.getTodayVisualReflection();
+      // Already done in flow and journey has moved on → advance
+      if (
+        existing
+        && window.Lighthouse.isFlowMode()
+        && progress.next
+        && progress.next !== 'visual'
+        && progress.nextHref
+      ) {
+        const guardKey = `lh_vis_done_${window.Lighthouse.localDateString()}`;
+        if (sessionStorage.getItem(guardKey) !== progress.next) {
+          sessionStorage.setItem(guardKey, progress.next);
+          showToast('Visual reflection already done — continuing…');
+          setTimeout(() => { window.location.href = progress.nextHref; }, 500);
+          return;
+        }
+      }
       renderGrid(existing ? existing.image_category : null);
       if (existing && existing.optional_note) {
         $('#visualNote').value = existing.optional_note;

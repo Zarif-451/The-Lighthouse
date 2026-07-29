@@ -68,16 +68,25 @@
 
       const freqs = [
         ['Reflection Frequency', data.reflectionCount, Math.min(100, data.reflectionCount * 8)],
-        ['Scenario Completion', data.scenarioCount, Math.min(100, data.scenarioCount * 8)],
+        ['Scenario Completion', data.scenarioCount, Math.min(100, data.scenarioCount * 4)],
         ['Check-in Activity', data.checkinCount, Math.min(100, data.checkinCount * 5)],
         ['Visual Reflections', data.visualCount, Math.min(100, data.visualCount * 8)],
+        ['Behavioral Activities', (data.activityStats && data.activityStats.totalCompleted) || 0, Math.min(100, ((data.activityStats && data.activityStats.totalCompleted) || 0) * 10)],
         ['Physical Activity Trend', data.activitySeries.filter((x) => x.value).length, Math.min(100, data.activitySeries.filter((x) => x.value).length * 5)],
       ];
       $('#freqGrid').innerHTML = freqs.map(([title, val, pct]) => `
         <div class="behavior"><div class="b-top"><span class="b-title">${title}</span></div>
         <div class="b-val">${val}<small> total</small></div>
         <div class="progress"><i style="width:${pct}%"></i></div>
-        <div class="b-foot">${val ? 'Based on your history' : 'Not enough data yet.'}</div></div>`).join('');
+        <div class="b-foot">${val ? 'Based on your history' : 'Complete more activities to unlock this insight.'}</div></div>`).join('');
+
+      const act = data.activityStats || {};
+      const compareExtra = [
+        ['Behavioral activities', act.totalCompleted || 0, act.enough ? `Streak: ${act.streak || 0} day(s)` : 'Complete more activities to unlock this insight.'],
+        ['Memory accuracy', act.memoryAvgAccuracy != null ? `${act.memoryAvgAccuracy}%` : '—', act.memoryAvgAccuracy != null ? 'Average recall accuracy' : 'Complete more activities to unlock this insight.'],
+        ['Reaction speed', act.reactionAvgMs != null ? `${act.reactionAvgMs} ms` : '—', act.reactionAvgMs != null ? 'Average best times' : 'Complete more activities to unlock this insight.'],
+      ];
+      $('#compareGrid').innerHTML += compareExtra.map(([l, v, s]) => `<div class="compare-card"><div class="cc-label">${l}</div><div class="cc-val">${v}</div><div class="cc-sub">${s}</div></div>`).join('');
     } catch (err) {
       showToast((err && err.message) || 'Could not load insights. Run schema_platform.sql if needed.');
     }

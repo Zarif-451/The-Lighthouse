@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scenario Assessment — Lighthouse</title>
+  <title>Behavioral Activity — Lighthouse</title>
   <script src="assets/js/theme.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗼</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -47,8 +47,8 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
         <div class="greeting">
-          <h1>Scenario Assessment</h1>
-          <p>Scenario of today’s wellbeing journey</p>
+          <h1 id="activityTitle">Behavioral Activity</h1>
+          <p id="activitySub">A short focus activity in today’s journey</p>
         </div>
         <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
         <button class="user-chip" id="userChip">
@@ -61,30 +61,33 @@
         <div class="flow-banner rise">
           <div>
             <strong>Guided journey</strong>
-            <p>Five everyday situations today — complete them in order with short activities between. Not a diagnosis.</p>
+            <p id="activityBanner">Complete this activity to unlock the next step. Steps unlock in order.</p>
           </div>
           <a class="btn btn-ghost" href="dashboard.html">Exit to Dashboard</a>
         </div>
 
-        <section class="card card-pad rise scenario-card" id="scenarioPanel">
-          <p class="scenario-loading" id="scenarioLoading">Loading today’s scenario…</p>
-          <div id="scenarioContent" hidden>
-            <span class="eyebrow" id="scenarioCategory">Category</span>
-            <h2 id="scenarioTitle" style="margin-top:12px;font-size:1.45rem;font-weight:800;letter-spacing:-0.02em;">Title</h2>
-            <p class="scenario-story" id="scenarioStory"></p>
-            <p class="scenario-question" id="scenarioQuestion"></p>
-            <div class="option-grid" id="optionGrid"></div>
+        <section class="card card-pad rise" id="activityPanel">
+          <div id="activityIntro">
+            <span class="eyebrow" id="activityEyebrow">Activity</span>
+            <h2 style="margin-top:12px;font-size:1.35rem;font-weight:800;letter-spacing:-0.02em;" id="introTitle">Ready?</h2>
+            <p class="scenario-story" id="introBody">Instructions appear here.</p>
             <div class="form-actions" style="margin-top:18px">
-              <button type="button" class="btn btn-primary" id="submitScenarioBtn" disabled>Continue</button>
+              <button type="button" class="btn btn-primary" id="startActivityBtn">Start</button>
             </div>
-            <p class="journal-hint" id="scenarioHint"></p>
           </div>
-          <div id="scenarioDone" hidden>
-            <span class="status-chip good">Completed today</span>
-            <h3 style="margin-top:14px;font-size:1.25rem;font-weight:800;">You’ve answered today’s scenario</h3>
-            <p id="doneSummary" class="scenario-story"></p>
+
+          <div id="activityPlay" hidden>
+            <div class="activity-stage" id="activityStage"></div>
+            <div class="form-actions" style="margin-top:18px" id="activityActions"></div>
+            <p class="journal-hint" id="activityHint"></p>
+          </div>
+
+          <div id="activityDone" hidden>
+            <span class="status-chip good">Completed</span>
+            <h3 style="margin-top:14px;font-size:1.25rem;font-weight:800;" id="doneTitle">Nice work</h3>
+            <p class="scenario-story" id="doneSummary"></p>
             <div class="form-actions" style="margin-top:18px">
-              <button type="button" class="btn btn-primary" id="continueVisualBtn">Continue journey</button>
+              <button type="button" class="btn btn-primary" id="continueJourneyBtn">Continue</button>
             </div>
           </div>
         </section>
@@ -101,7 +104,7 @@
   <script src="assets/js/config.js"></script>
   <script src="assets/js/supabase-client.js"></script>
   <script src="assets/js/journey.js"></script>
+  <script src="assets/js/activity.js"></script>
   <script>if (window.LighthouseTheme) window.LighthouseTheme.bindToggles();</script>
-  <script src="assets/js/scenario.js"></script>
 </body>
 </html>

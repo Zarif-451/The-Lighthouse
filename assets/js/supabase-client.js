@@ -21,6 +21,18 @@
   const MOODS = ['Very Low', 'Low', 'Neutral', 'Good', 'Excellent'];
   const ACTIVITIES = ['None', 'Light', 'Moderate', 'High'];
   const MOOD_SCORES = { 'Very Low': 1, Low: 2, Neutral: 3, Good: 4, Excellent: 5 };
+  const MOOD_EMOJI = {
+    'Very Low': '😫',
+    Low: '😕',
+    Neutral: '😐',
+    Good: '🙂',
+    Excellent: '🤩',
+  };
+  function moodLabel(mood) {
+    const m = String(mood || '');
+    const emoji = MOOD_EMOJI[m];
+    return emoji ? `${emoji} ${m}` : m;
+  }
   const ACTIVITY_SCORES = { None: 1, Light: 2, Moderate: 3, High: 4 };
 
   const VISUAL_OPTIONS = [
@@ -380,64 +392,495 @@
   async function listScenarioResponses() {
     const { data, error } = await getClient()
       .from('scenario_responses')
-      .select('id, user_id, scenario_id, selected_option, response_date, created_at')
+      .select('id, user_id, scenario_id, selected_option, response_date, slot, created_at')
       .order('created_at', { ascending: false });
-    if (error) throw error;
+    if (error) {
+      // Pre-migration fallback (no slot column yet)
+      if (String(error.message || '').includes('slot')) {
+        const retry = await getClient()
+          .from('scenario_responses')
+          .select('id, user_id, scenario_id, selected_option, response_date, created_at')
+          .order('created_at', { ascending: false });
+        if (retry.error) throw retry.error;
+        return (retry.data || []).map((r) => ({ ...r, slot: 1 }));
+      }
+      throw error;
+    }
     return data || [];
   }
 
-  async function getTodayScenarioResponse() {
+  async function getTodayScenarioResponses() {
     const today = localDateString();
+    // Prefer created_at order so we never depend on maybeSingle (breaks with 5/day).
     const { data, error } = await getClient()
       .from('scenario_responses')
       .select('*, scenario:scenario_bank(*)')
       .eq('response_date', today)
-      .maybeSingle();
+      .order('created_at', { ascending: true });
     if (error) throw error;
-    return data || null;
+    const rows = data || [];
+    return rows.map((r, i) => {
+      const raw = r.slot;
+      const n = raw == null || raw === '' ? NaN : Number(raw);
+      return {
+        ...r,
+        slot: Number.isFinite(n) && n >= 1 && n <= 5 ? n : (rows.length === 1 ? 1 : i + 1),
+      };
+    });
   }
 
-  async function pickTodaysScenario(userId) {
-    const [scenarios, responses] = await Promise.all([listScenarios(), listScenarioResponses()]);
-    if (!scenarios.length) {
-      throw new Error('No scenarios found. Run supabase/schema_wellbeing.sql in your project.');
+  async function getTodayScenarioResponseLegacy() {
+    const rows = await getTodayScenarioResponses();
+    return rows[0] || null;
+  }
+
+  /** Back-compat: first / any response today */
+  async function getTodayScenarioResponse() {
+    const rows = await getTodayScenarioResponses();
+    return rows[0] || null;
+  }
+
+  async function getTodayScenarioResponseForSlot(slot) {
+    const s = Number(slot) || 1;
+    const rows = await getTodayScenarioResponses();
+    return rows.find((r) => Number(r.slot) === s) || null;
+  }
+
+  function seededShuffle(arr, seed) {
+    const a = arr.slice();
+    let s = seed >>> 0;
+    for (let i = a.length - 1; i > 0; i -= 1) {
+      s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+      const j = s % (i + 1);
+      const tmp = a[i];
+      a[i] = a[j];
+      a[j] = tmp;
+    }
+    return a;
+  }
+
+  async function ensureTodaysScenarioPicks(userId) {
+    const user = userId ? { id: userId } : await getUser();
+    if (!user) throw new Error('Not signed in.');
+    const today = localDateString();
+
+    const existing = await getClient()
+      .from('daily_scenario_picks')
+      .select('*, scenario:scenario_bank(*)')
+      .eq('pick_date', today)
+      .order('slot', { ascending: true });
+
+    // Table may not exist yet — fall back to computed picks without persistence
+    if (existing.error && (
+      String(existing.error.message || '').includes('schema cache')
+      || existing.error.code === '42P01'
+      || String(existing.error.message || '').includes('daily_scenario_picks')
+    )) {
+      return computeFallbackPicks(user.id);
+    }
+    if (existing.error) throw existing.error;
+
+    const have = existing.data || [];
+    const bySlot = new Map(have.map((p) => [Number(p.slot), p]));
+    if ([1, 2, 3, 4, 5].every((s) => bySlot.has(s))) {
+      return [1, 2, 3, 4, 5].map((s) => bySlot.get(s));
     }
 
-    const answeredIds = new Set(responses.map((r) => r.scenario_id));
-    let pool = scenarios.filter((s) => !answeredIds.has(s.id));
+    const scenarios = await listScenarios();
+    if (scenarios.length < 5) {
+      throw new Error('Need at least 5 scenarios. Run seed_scenarios_extended.sql in Supabase.');
+    }
+
+    const allResponses = await listScenarioResponses();
+    const answeredIds = new Set(allResponses.map((r) => r.scenario_id));
+    const usedIds = new Set(have.map((p) => p.scenario_id));
+    let pool = scenarios.filter((s) => !answeredIds.has(s.id) && !usedIds.has(s.id));
+    if (pool.length < 5 - have.length) {
+      pool = scenarios.filter((s) => !usedIds.has(s.id));
+    }
     if (!pool.length) pool = scenarios.slice();
 
-    const seed = hashString(`${userId || 'user'}-${localDateString()}`);
-    return pool[seed % pool.length];
-  }
+    const seed = hashString(`${user.id}-${today}-fill`);
+    const shuffled = seededShuffle(pool, seed);
+    const missing = [1, 2, 3, 4, 5].filter((s) => !bySlot.has(s));
+    const toInsert = [];
+    let pi = 0;
+    missing.forEach((slotNum) => {
+      // Prefer unused scenarios; cycle if needed
+      let sc = shuffled[pi % shuffled.length];
+      pi += 1;
+      let guard = 0;
+      while (usedIds.has(sc.id) && guard < shuffled.length) {
+        sc = shuffled[pi % shuffled.length];
+        pi += 1;
+        guard += 1;
+      }
+      usedIds.add(sc.id);
+      toInsert.push({
+        user_id: user.id,
+        pick_date: today,
+        slot: slotNum,
+        scenario_id: sc.id,
+      });
+    });
 
-  async function saveScenarioResponse(scenarioId, selectedOption) {
-    const user = await getUser();
-    if (!user) throw new Error('You must be logged in to save a scenario response.');
-    const opt = String(selectedOption || '').toUpperCase();
-    if (!['A', 'B', 'C', 'D'].includes(opt)) throw new Error('Please select one of the four options.');
-
-    const today = localDateString();
-    const existing = await getTodayScenarioResponse();
-    if (existing) {
-      throw new Error('You already completed today’s scenario assessment.');
+    if (toInsert.length) {
+      const { error: insErr } = await getClient()
+        .from('daily_scenario_picks')
+        .insert(toInsert);
+      if (insErr && !/duplicate|unique/i.test(String(insErr.message || ''))) {
+        throw insErr;
+      }
     }
 
-    const { data, error } = await getClient()
-      .from('scenario_responses')
-      .insert({
-        user_id: user.id,
-        scenario_id: scenarioId,
-        selected_option: opt,
-        response_date: today,
-      })
+    const refreshed = await getClient()
+      .from('daily_scenario_picks')
       .select('*, scenario:scenario_bank(*)')
+      .eq('pick_date', today)
+      .order('slot', { ascending: true });
+    if (refreshed.error) throw refreshed.error;
+    const rows = refreshed.data || [];
+    if (rows.length < 5) {
+      // Last resort: merge with computed fallback for missing slots only
+      const fb = await computeFallbackPicks(user.id);
+      const map = new Map(rows.map((r) => [Number(r.slot), r]));
+      fb.forEach((p) => {
+        if (!map.has(Number(p.slot))) map.set(Number(p.slot), p);
+      });
+      return [1, 2, 3, 4, 5].map((s) => map.get(s)).filter(Boolean);
+    }
+    return rows;
+  }
+
+  async function computeFallbackPicks(userId) {
+    const today = localDateString();
+    const [scenarios, responses] = await Promise.all([listScenarios(), listScenarioResponses()]);
+    if (scenarios.length < 1) {
+      throw new Error('No scenarios found. Run supabase/schema_wellbeing.sql in your project.');
+    }
+    const answeredIds = new Set(responses.map((r) => r.scenario_id));
+    let pool = scenarios.filter((s) => !answeredIds.has(s.id));
+    if (pool.length < 5) pool = scenarios.slice();
+    const seed = hashString(`${userId}-${today}`);
+    const chosen = seededShuffle(pool, seed).slice(0, Math.min(5, pool.length));
+    while (chosen.length < 5 && scenarios.length) {
+      chosen.push(scenarios[chosen.length % scenarios.length]);
+    }
+    return chosen.map((sc, idx) => ({
+      slot: idx + 1,
+      scenario_id: sc.id,
+      scenario: sc,
+      pick_date: today,
+    }));
+  }
+
+  async function pickTodaysScenario(userId, slot) {
+    const s = Number(slot) || 1;
+    const picks = await ensureTodaysScenarioPicks(userId);
+    const pick = picks.find((p) => Number(p.slot) === s);
+    if (!pick) {
+      throw new Error(`Could not load scenario for slot ${s}. Try refreshing, or re-run schema_journey_extended.sql.`);
+    }
+    if (pick.scenario) return pick.scenario;
+    const { data, error } = await getClient()
+      .from('scenario_bank')
+      .select('*')
+      .eq('id', pick.scenario_id)
       .single();
     if (error) throw error;
     return data;
   }
 
-  /* ---------------------------- Visual reflections ------------------------ */
+  async function saveScenarioResponse(scenarioId, selectedOption, slot) {
+    const user = await getUser();
+    if (!user) throw new Error('You must be logged in to save a scenario response.');
+    const opt = String(selectedOption || '').toUpperCase();
+    if (!['A', 'B', 'C', 'D'].includes(opt)) throw new Error('Please select one of the four options.');
+    const s = Number(slot) || 1;
+    if (s < 1 || s > 5) throw new Error('Invalid scenario slot.');
+
+    const today = localDateString();
+    const existing = await getTodayScenarioResponseForSlot(s);
+    if (existing) {
+      throw new Error(`You already completed scenario ${s} today.`);
+    }
+
+    const payload = {
+      user_id: user.id,
+      scenario_id: scenarioId,
+      selected_option: opt,
+      response_date: today,
+      slot: s,
+    };
+
+    const { data, error } = await getClient()
+      .from('scenario_responses')
+      .insert(payload)
+      .select('*, scenario:scenario_bank(*)')
+      .single();
+    if (error) {
+      // Legacy DB without slot column
+      if (String(error.message || '').includes('slot')) {
+        const legacyExisting = await getTodayScenarioResponseLegacy();
+        if (legacyExisting) throw new Error('You already completed today’s scenario assessment.');
+        const retry = await getClient()
+          .from('scenario_responses')
+          .insert({
+            user_id: user.id,
+            scenario_id: scenarioId,
+            selected_option: opt,
+            response_date: today,
+          })
+          .select('*, scenario:scenario_bank(*)')
+          .single();
+        if (retry.error) throw retry.error;
+        return retry.data;
+      }
+      const msg = String(error.message || '');
+      if (/unique|duplicate/i.test(msg)) {
+        throw new Error(
+          'Could not save this scenario slot. Run supabase/schema_journey_extended.sql so 5 scenarios per day are allowed.'
+        );
+      }
+      throw error;
+    }
+    return data;
+  }
+
+  /* ---------------------------- Behavioral activities --------------------- */
+
+  async function listActivityResults({ limit, activityType } = {}) {
+    let query = getClient()
+      .from('behavioral_activity_results')
+      .select('*')
+      .order('completed_at', { ascending: false });
+    if (activityType) query = query.eq('activity_type', activityType);
+    if (limit && Number(limit) > 0) query = query.limit(Number(limit));
+    const { data, error } = await query;
+    if (error) {
+      if (String(error.message || '').includes('schema cache') || error.code === '42P01') return [];
+      throw error;
+    }
+    return data || [];
+  }
+
+  async function getTodayActivityResult(activityType) {
+    const today = localDateString();
+    const { data, error } = await getClient()
+      .from('behavioral_activity_results')
+      .select('*')
+      .eq('activity_type', activityType)
+      .eq('activity_date', today)
+      .order('completed_at', { ascending: false })
+      .limit(1);
+    if (error) {
+      if (String(error.message || '').includes('schema cache') || error.code === '42P01') return null;
+      throw error;
+    }
+    return (data && data[0]) || null;
+  }
+
+  async function saveActivityResult({
+    activityType,
+    score,
+    accuracy,
+    completionTime,
+    attempts,
+    meta,
+  }) {
+    const user = await getUser();
+    if (!user) throw new Error('You must be logged in to save an activity result.');
+    const type = String(activityType || '').trim();
+    if (!type) throw new Error('Missing activity type.');
+    const today = localDateString();
+
+    const existing = await getTodayActivityResult(type);
+    if (existing) return existing;
+
+    const { data, error } = await getClient()
+      .from('behavioral_activity_results')
+      .insert({
+        user_id: user.id,
+        activity_type: type,
+        activity_date: today,
+        score: score == null ? null : Number(score),
+        accuracy: accuracy == null ? null : Number(accuracy),
+        completion_time: completionTime == null ? null : Number(completionTime),
+        attempts: attempts == null ? 1 : Number(attempts),
+        meta: meta && typeof meta === 'object' ? meta : {},
+        completed_at: new Date().toISOString(),
+      })
+      .select('*')
+      .single();
+    if (error) {
+      if (String(error.message || '').includes('schema cache') || error.code === '42P01') {
+        throw new Error('Run schema_journey_extended.sql in Supabase to enable behavioral activities.');
+      }
+      // Unique race: another insert won — treat as success
+      if (/unique|duplicate/i.test(String(error.message || ''))) {
+        const again = await getTodayActivityResult(type);
+        if (again) return again;
+      }
+      throw error;
+    }
+    return data;
+  }
+
+  async function getActivityStats() {
+    const rows = await listActivityResults({ limit: 200 });
+    const byType = {};
+    rows.forEach((r) => {
+      if (!byType[r.activity_type]) byType[r.activity_type] = [];
+      byType[r.activity_type].push(r);
+    });
+
+    const memory = byType.memory || [];
+    const reaction = byType.reaction || [];
+    const word = byType.word_puzzle || [];
+
+    const dates = [...new Set(rows.map((r) => r.activity_date))].sort().reverse();
+    let streak = 0;
+    const today = localDateString();
+    const dayMs = 86400000;
+    let cursor = new Date(`${today}T12:00:00`);
+    for (;;) {
+      const key = localDateString(cursor);
+      if (dates.includes(key)) {
+        streak += 1;
+        cursor = new Date(cursor.getTime() - dayMs);
+      } else if (key === today) {
+        cursor = new Date(cursor.getTime() - dayMs);
+      } else break;
+    }
+
+    const counts = Object.fromEntries(
+      Object.keys(byType).map((k) => [k, byType[k].length])
+    );
+    let favorite = null;
+    let favCount = 0;
+    Object.entries(counts).forEach(([k, n]) => {
+      if (n > favCount) { favorite = k; favCount = n; }
+    });
+
+    const avg = (arr, fn) => {
+      const vals = arr.map(fn).filter((n) => n != null && !Number.isNaN(n));
+      if (!vals.length) return null;
+      return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+    };
+
+    return {
+      totalCompleted: rows.length,
+      favorite,
+      streak,
+      lastActivityDate: rows[0] ? rows[0].activity_date : null,
+      memoryAvgAccuracy: avg(memory, (r) => r.accuracy),
+      reactionAvgMs: avg(reaction, (r) => r.score),
+      wordCompletions: word.length,
+      weeklyCompletionDays: dates.filter((d) => {
+        const t = new Date(`${d}T12:00:00`).getTime();
+        return Date.now() - t <= 7 * dayMs;
+      }).length,
+      byType,
+      recent: rows.slice(0, 20),
+      enough: rows.length >= 3,
+    };
+  }
+
+  /* ---------------------------- Today’s journey --------------------------- */
+
+  async function getTodaysProgress() {
+    const [checkin, scenarioRows, visual, journalToday, memory, word, reaction] = await Promise.all([
+      getTodayCheckin(),
+      getTodayScenarioResponses(),
+      getTodayVisualReflection(),
+      hasReflectionToday(),
+      getTodayActivityResult('memory'),
+      getTodayActivityResult('word_puzzle'),
+      getTodayActivityResult('reaction'),
+    ]);
+
+    const slotsDone = new Set(scenarioRows.map((r) => Number(r.slot) || 1));
+    // Legacy: one response without slot counts as scenario_1
+    if (scenarioRows.length === 1 && !scenarioRows[0].slot) slotsDone.add(1);
+
+    const steps = {
+      checkin: !!checkin,
+      scenario_1: slotsDone.has(1),
+      memory: !!memory,
+      scenario_2: slotsDone.has(2),
+      visual: !!visual,
+      scenario_3: slotsDone.has(3),
+      word_puzzle: !!word,
+      scenario_4: slotsDone.has(4),
+      reaction: !!reaction,
+      scenario_5: slotsDone.has(5),
+      journal: !!journalToday,
+      // Back-compat aliases for older UI checks
+      scenario: slotsDone.has(1),
+    };
+
+    const order = [
+      'checkin', 'scenario_1', 'memory', 'scenario_2', 'visual',
+      'scenario_3', 'word_puzzle', 'scenario_4', 'reaction', 'scenario_5', 'journal',
+    ];
+    const coreOrder = order.filter((k) => k !== 'journal');
+    const completed = order.filter((k) => steps[k]).length;
+    const coreComplete = coreOrder.every((k) => steps[k]);
+    const next = order.find((k) => !steps[k]) || null;
+
+    const nextHrefMap = {
+      checkin: 'checkins.html?flow=1',
+      scenario_1: 'scenario.html?flow=1&slot=1',
+      memory: 'activity.html?flow=1&type=memory',
+      scenario_2: 'scenario.html?flow=1&slot=2',
+      visual: 'visual.html?flow=1',
+      scenario_3: 'scenario.html?flow=1&slot=3',
+      word_puzzle: 'activity.html?flow=1&type=word_puzzle',
+      scenario_4: 'scenario.html?flow=1&slot=4',
+      reaction: 'activity.html?flow=1&type=reaction',
+      scenario_5: 'scenario.html?flow=1&slot=5',
+      journal: 'journal.html?flow=1',
+    };
+
+    // Prefer clean-URL aware hrefs when journey helper is loaded
+    const liveHref = (key) => {
+      try {
+        if (global.LighthouseJourney && typeof global.LighthouseJourney.hrefFor === 'function') {
+          return global.LighthouseJourney.hrefFor(key);
+        }
+      } catch (e) { /* ignore */ }
+      return nextHrefMap[key];
+    };
+    Object.keys(nextHrefMap).forEach((k) => { nextHrefMap[k] = liveHref(k); });
+
+    const labels = {
+      checkin: 'Daily Check-in',
+      scenario_1: 'Scenario 1',
+      memory: 'Memory Challenge',
+      scenario_2: 'Scenario 2',
+      visual: 'Visual Reflection',
+      scenario_3: 'Scenario 3',
+      word_puzzle: 'Word Puzzle',
+      scenario_4: 'Scenario 4',
+      reaction: 'Reaction Challenge',
+      scenario_5: 'Scenario 5',
+      journal: 'Reflection Journal',
+      scenario: 'Scenario Assessment',
+    };
+
+    return {
+      steps,
+      completed,
+      total: order.length,
+      next,
+      nextHref: next ? nextHrefMap[next] : null,
+      labels,
+      order,
+      nextHrefMap,
+      coreComplete,
+      scenarioCountToday: slotsDone.size,
+    };
+  }
 
   async function listVisualReflections({ limit } = {}) {
     let query = getClient()
@@ -497,48 +940,6 @@
     return { row: data, created: true };
   }
 
-  /* ---------------------------- Today’s journey --------------------------- */
-
-  async function getTodaysProgress() {
-    const [checkin, scenario, visual, journalToday] = await Promise.all([
-      getTodayCheckin(),
-      getTodayScenarioResponse(),
-      getTodayVisualReflection(),
-      hasReflectionToday(),
-    ]);
-
-    const steps = {
-      checkin: !!checkin,
-      scenario: !!scenario,
-      visual: !!visual,
-      journal: !!journalToday,
-    };
-    const order = ['checkin', 'scenario', 'visual', 'journal'];
-    const completed = order.filter((k) => steps[k]).length;
-    const next = order.find((k) => !steps[k]) || null;
-
-    const nextHref = {
-      checkin: 'checkins.html?flow=1',
-      scenario: 'scenario.html?flow=1',
-      visual: 'visual.html?flow=1',
-      journal: 'journal.html?flow=1',
-    };
-
-    return {
-      steps,
-      completed,
-      total: 4,
-      next,
-      nextHref: next ? nextHref[next] : null,
-      labels: {
-        checkin: 'Daily Check-in',
-        scenario: 'Scenario Assessment',
-        visual: 'Visual Reflection',
-        journal: 'Reflection Journal',
-      },
-    };
-  }
-
   /* ---------------------------- Dashboard analytics ----------------------- */
 
   function average(nums) {
@@ -547,13 +948,14 @@
   }
 
   async function getDashboardMetrics() {
-    const [checkins, reflectionsCount, scenarioResponses, visualRows, progress, reflectionsList] = await Promise.all([
+    const [checkins, reflectionsCount, scenarioResponses, visualRows, progress, reflectionsList, activityStats] = await Promise.all([
       listCheckins({ limit: 90 }),
       countReflections(),
       listScenarioResponses(),
       listVisualReflections({ limit: 90 }),
       getTodaysProgress(),
       listReflections({ limit: 90 }),
+      getActivityStats(),
     ]);
 
     const recentCheckins = checkins.slice(0, 30);
@@ -570,8 +972,13 @@
     const activityAvg = average(activityVals);
 
     const activeDays = new Set(checkins.map((c) => c.checkin_date)).size;
-    // Approx. completed journeys: days with a check-in (journey starts there)
-    const completedJourneys = activeDays;
+    const scenariosByDay = {};
+    scenarioResponses.forEach((r) => {
+      const d = r.response_date;
+      scenariosByDay[d] = (scenariosByDay[d] || 0) + 1;
+    });
+    const fullScenarioDays = Object.values(scenariosByDay).filter((n) => n >= 5).length;
+    const completedJourneys = fullScenarioDays || activeDays;
 
     const THRESH = {
       trend: 7,
@@ -724,12 +1131,13 @@
       visualCount: visualRows.length,
       completedJourneys,
       recentCheckins: checkins.slice(0, 5),
+      activityStats,
       needs,
       realAnalytics,
       demoAnalytics,
       thresholds: THRESH,
       insufficientMessage: 'Not enough data yet.',
-      unlockMessage: 'Not enough data yet. Complete more daily check-ins to unlock this insight.',
+      unlockMessage: 'Complete more activities to unlock this insight.',
       demoCaption: 'Sample visualization for demonstration.',
     };
   }
@@ -987,11 +1395,12 @@
   }
 
   async function getInsightsData() {
-    const [checkins, reflections, scenarios, visuals] = await Promise.all([
+    const [checkins, reflections, scenarios, visuals, activityStats] = await Promise.all([
       listCheckins({ limit: 120 }),
       listReflections({ limit: 120 }),
       listScenarioResponses(),
       listVisualReflections({ limit: 120 }),
+      getActivityStats(),
     ]);
 
     const thisWeek = weekBounds(0);
@@ -1053,6 +1462,9 @@
     if (scenarios.length > 0) {
       summaries.push(`You have completed ${scenarios.length} scenario assessment${scenarios.length === 1 ? '' : 's'}.`);
     }
+    if (activityStats.totalCompleted > 0) {
+      summaries.push(`You have completed ${activityStats.totalCompleted} behavioral activit${activityStats.totalCompleted === 1 ? 'y' : 'ies'}.`);
+    }
     if (!summaries.length) {
       summaries.push('Continue using Lighthouse to unlock personalized insights.');
     }
@@ -1060,7 +1472,7 @@
     return {
       enough,
       insufficientMessage: 'Not enough data yet.',
-      unlockMessage: 'Continue using Lighthouse to unlock personalized insights.',
+      unlockMessage: 'Complete more activities to unlock this insight.',
       sleepSeries,
       moodSeries,
       prodSeries,
@@ -1073,6 +1485,7 @@
       visualCount: visuals.length,
       visualCounts,
       topVisual: topVisualMeta ? topVisualMeta.title : null,
+      activityStats,
       summaries,
       weekly: {
         checkinsThis: checkinsThis.length,
@@ -1093,17 +1506,19 @@
     else start.setDate(start.getDate() - 7);
     const end = new Date();
 
-    const [checkins, reflections, scenarios, visuals] = await Promise.all([
+    const [checkins, reflections, scenarios, visuals, activityRows] = await Promise.all([
       listCheckins({ limit: 120 }),
       listReflections({ limit: 120 }),
       listScenarioResponses(),
       listVisualReflections({ limit: 120 }),
+      listActivityResults({ limit: 200 }),
     ]);
 
     const c = checkins.filter((x) => inRange(x.checkin_date, start, end));
     const r = reflections.filter((x) => inRange(x.created_at, start, end));
     const s = scenarios.filter((x) => inRange(x.response_date || x.created_at, start, end));
     const v = visuals.filter((x) => inRange(x.reflection_date || x.created_at, start, end));
+    const a = activityRows.filter((x) => inRange(x.activity_date || x.completed_at, start, end));
 
     const sleepAvg = average(c.map((x) => Number(x.sleep_hours)));
     const moodAvg = average(c.map((x) => MOOD_SCORES[x.mood]).filter(Boolean));
@@ -1116,7 +1531,13 @@
     const visualDist = {};
     v.forEach((x) => { visualDist[x.image_category] = (visualDist[x.image_category] || 0) + 1; });
 
-    const engagement = Math.min(100, Math.round(((c.length + r.length + s.length + v.length) / (isMonth ? 40 : 16)) * 100));
+    const memoryRows = a.filter((x) => x.activity_type === 'memory');
+    const reactionRows = a.filter((x) => x.activity_type === 'reaction');
+    const wordRows = a.filter((x) => x.activity_type === 'word_puzzle');
+    const memoryAvg = average(memoryRows.map((x) => Number(x.accuracy)).filter((n) => !Number.isNaN(n)));
+    const reactionAvg = average(reactionRows.map((x) => Number(x.score)).filter((n) => !Number.isNaN(n)));
+
+    const engagement = Math.min(100, Math.round(((c.length + r.length + s.length + v.length + a.length) / (isMonth ? 50 : 20)) * 100));
 
     return {
       period: isMonth ? 'Monthly' : 'Weekly',
@@ -1126,6 +1547,10 @@
       checkinCount: c.length,
       scenarioCount: s.length,
       visualCount: v.length,
+      activityCount: a.length,
+      memoryAvgAccuracy: memoryAvg == null ? null : Math.round(memoryAvg * 10) / 10,
+      reactionAvgMs: reactionAvg == null ? null : Math.round(reactionAvg),
+      wordPuzzleCount: wordRows.length,
       sleepAvg: sleepAvg == null ? null : Math.round(sleepAvg * 10) / 10,
       moodAvg: moodAvg == null ? null : Math.round(moodAvg * 10) / 10,
       prodAvg: prodAvg == null ? null : Math.round(prodAvg * 10) / 10,
@@ -1133,8 +1558,8 @@
       activityDist,
       visualDist,
       engagement,
-      enough: c.length + r.length >= 2,
-      unlockMessage: 'Continue using Lighthouse to unlock insights.',
+      enough: c.length + r.length + a.length >= 2,
+      unlockMessage: 'Complete more activities to unlock this insight.',
       insufficientMessage: 'Not enough data yet.',
     };
   }
@@ -1665,6 +2090,8 @@
     countReflections,
     hasReflectionToday,
     MOODS,
+    MOOD_EMOJI,
+    moodLabel,
     ACTIVITIES,
     VISUAL_OPTIONS,
     listCheckins,
@@ -1674,8 +2101,15 @@
     listScenarios,
     listScenarioResponses,
     getTodayScenarioResponse,
+    getTodayScenarioResponses,
+    getTodayScenarioResponseForSlot,
+    ensureTodaysScenarioPicks,
     pickTodaysScenario,
     saveScenarioResponse,
+    listActivityResults,
+    getTodayActivityResult,
+    saveActivityResult,
+    getActivityStats,
     listVisualReflections,
     getTodayVisualReflection,
     saveVisualReflection,

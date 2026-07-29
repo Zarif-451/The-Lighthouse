@@ -100,7 +100,7 @@
     renderSummary(metrics);
     if (window.Chart) {
       Chart.defaults.font.family = "'Inter', sans-serif";
-      Chart.defaults.color = '#475569';
+      Chart.defaults.color = document.documentElement.getAttribute('data-theme') === 'dark' ? '#CBD5E1' : '#475569';
       buildTrend(trendRange);
       buildDist();
     }
@@ -134,37 +134,51 @@
   function renderProgress(progress) {
     $('#progressDone').textContent = String(progress.completed);
     $('#progressTotal').textContent = String(progress.total);
-    const pct = Math.round((progress.completed / progress.total) * 100);
+    const pct = Math.round((progress.completed / Math.max(1, progress.total)) * 100);
     requestAnimationFrame(() => { $('#progressBarFill').style.width = pct + '%'; });
 
-    const order = ['checkin', 'scenario', 'visual', 'journal'];
-    const hrefs = {
-      checkin: 'checkins.html?flow=1',
-      scenario: 'scenario.html?flow=1',
-      visual: 'visual.html?flow=1',
-      journal: 'journal.html?flow=1',
-    };
+    const order = progress.order || (window.LighthouseJourney && window.LighthouseJourney.JOURNEY_STEPS
+      ? window.LighthouseJourney.JOURNEY_STEPS.map((s) => s.key)
+      : ['checkin', 'scenario_1', 'memory', 'scenario_2', 'visual', 'scenario_3', 'word_puzzle', 'scenario_4', 'reaction', 'scenario_5', 'journal']);
+    const hrefs = {};
+    order.forEach((key) => {
+      hrefs[key] = (window.LighthouseJourney && window.LighthouseJourney.hrefFor)
+        ? window.LighthouseJourney.hrefFor(key)
+        : (progress.nextHrefMap && progress.nextHrefMap[key]) || '#';
+    });
+    const labels = progress.labels || {};
+
     $('#journeySteps').innerHTML = order.map((key) => {
-      const done = progress.steps[key];
+      const done = !!progress.steps[key];
       const isNext = progress.next === key;
-      const cls = `journey-step${done ? ' done' : ''}${isNext ? ' next' : ''}`;
-      const sub = done ? 'Done' : isNext ? 'Up next' : 'Pending';
-      return `<a class="${cls}" href="${hrefs[key]}">
+      const locked = !done && !isNext;
+      const optional = key === 'journal';
+      const cls = `journey-step${done ? ' done' : ''}${isNext ? ' next' : ''}${locked ? ' locked' : ''}${optional ? ' optional' : ''}`;
+      const sub = done ? 'Done' : isNext ? 'Up next' : optional ? 'Optional' : 'Locked';
+      const href = locked ? '#' : (hrefs[key] || '#');
+      return `<a class="${cls}" href="${href}" ${locked ? 'aria-disabled="true" tabindex="-1"' : ''}>
         <span class="js-check">${done ? '✓' : ''}</span>
-        <span class="js-label">${progress.labels[key]}</span>
+        <span class="js-label">${labels[key] || key}</span>
         <span class="js-sub">${sub}</span>
       </a>`;
     }).join('');
 
     const btn = $('#continueJourneyBtn');
-    if (progress.completed === progress.total) {
+    if (progress.coreComplete && progress.steps.journal) {
       btn.textContent = 'Today’s journey complete';
-      btn.href = 'dashboard.html';
+      btn.href = (window.LighthouseJourney && window.LighthouseJourney.pageHref)
+        ? window.LighthouseJourney.pageHref('dashboard')
+        : 'dashboard.html';
       btn.classList.remove('btn-primary');
       btn.classList.add('btn-teal');
+    } else if (progress.coreComplete && !progress.steps.journal) {
+      btn.textContent = 'Optional — Reflection Journal';
+      btn.href = hrefs.journal || 'journal.html?flow=1';
+      btn.classList.add('btn-primary');
+      btn.classList.remove('btn-teal');
     } else {
-      btn.textContent = `Continue — ${progress.labels[progress.next]}`;
-      btn.href = progress.nextHref || 'checkins.html?flow=1';
+      btn.textContent = `Continue — ${labels[progress.next] || 'next step'}`;
+      btn.href = (progress.next && hrefs[progress.next]) || progress.nextHref || hrefs.checkin || 'checkins.html?flow=1';
       btn.classList.add('btn-primary');
       btn.classList.remove('btn-teal');
     }
@@ -299,11 +313,60 @@
         ic: 'ic-amber',
         val: String(m.scenarioCount),
         unit: 'responses',
-        pct: Math.min(100, m.scenarioCount * 5),
-        trend: m.progress.steps.scenario ? 'Completed today' : 'Pending today',
+        pct: Math.min(100, m.scenarioCount * 2),
+        trend: (m.progress.scenarioCountToday || 0) >= 5
+          ? 'All 5 done today'
+          : `${m.progress.scenarioCountToday || 0}/5 today`,
         dir: m.scenarioCount ? 'up' : 'flat',
         demo: false,
         svg: '<path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>',
+      },
+      {
+        title: 'Memory Performance',
+        ic: 'ic-teal',
+        val: (m.activityStats && m.activityStats.memoryAvgAccuracy != null)
+          ? String(m.activityStats.memoryAvgAccuracy)
+          : '—',
+        unit: (m.activityStats && m.activityStats.memoryAvgAccuracy != null) ? '% avg' : '',
+        pct: (m.activityStats && m.activityStats.memoryAvgAccuracy != null)
+          ? Math.round(m.activityStats.memoryAvgAccuracy)
+          : 0,
+        trend: (m.activityStats && m.activityStats.memoryAvgAccuracy != null)
+          ? 'From Memory Challenge'
+          : 'Complete more activities to unlock this insight.',
+        dir: (m.activityStats && m.activityStats.memoryAvgAccuracy != null) ? 'up' : 'flat',
+        demo: false,
+        svg: '<circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/>',
+      },
+      {
+        title: 'Reaction Speed',
+        ic: 'ic-rose',
+        val: (m.activityStats && m.activityStats.reactionAvgMs != null)
+          ? String(m.activityStats.reactionAvgMs)
+          : '—',
+        unit: (m.activityStats && m.activityStats.reactionAvgMs != null) ? 'ms avg' : '',
+        pct: (m.activityStats && m.activityStats.reactionAvgMs != null)
+          ? Math.max(8, Math.min(100, Math.round(600 / Math.max(1, m.activityStats.reactionAvgMs) * 100)))
+          : 0,
+        trend: (m.activityStats && m.activityStats.reactionAvgMs != null)
+          ? 'From Reaction Challenge'
+          : 'Complete more activities to unlock this insight.',
+        dir: (m.activityStats && m.activityStats.reactionAvgMs != null) ? 'up' : 'flat',
+        demo: false,
+        svg: '<path d="M13 2 3 14h8l-1 8 10-12h-8z"/>',
+      },
+      {
+        title: 'Activity Streak',
+        ic: 'ic-violet',
+        val: String((m.activityStats && m.activityStats.streak) || 0),
+        unit: 'days',
+        pct: Math.min(100, ((m.activityStats && m.activityStats.streak) || 0) * 14),
+        trend: (m.activityStats && m.activityStats.totalCompleted)
+          ? `${m.activityStats.totalCompleted} activities completed`
+          : 'Complete more activities to unlock this insight.',
+        dir: (m.activityStats && m.activityStats.streak) ? 'up' : 'flat',
+        demo: false,
+        svg: '<path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/>',
       },
       {
         title: 'Visual Reflection',
@@ -527,7 +590,7 @@
           x: { grid: { display: false }, ticks: { color: '#94a3b8', maxTicksLimit: 8, font: { size: 11 } }, border: { display: false } },
           y: {
             min: 0, max: 100,
-            grid: { color: '#eef2f7' },
+            grid: { color: document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(148,163,184,0.12)' : '#eef2f7' },
             ticks: { color: '#94a3b8', stepSize: 20, font: { size: 11 } },
             border: { display: false },
           },
@@ -749,6 +812,13 @@
       buildTrend(trendRange);
     });
 
+    window.addEventListener('lh-theme-change', () => {
+      if (!window.Chart || !metrics) return;
+      Chart.defaults.color = document.documentElement.getAttribute('data-theme') === 'dark' ? '#CBD5E1' : '#475569';
+      buildTrend(trendRange);
+      buildDist();
+    });
+
     const modeRoot = $('#analyticsMode');
     if (modeRoot) {
       modeRoot.addEventListener('click', (e) => {
@@ -835,9 +905,15 @@
       // Side card text from real streak-ish active days
       const sideP = $('.side-card p');
       if (sideP) {
-        sideP.textContent = rawMetrics.progress.completed === 4
-          ? 'Today’s journey is complete. Come back tomorrow to keep the light on.'
-          : `You’ve completed ${rawMetrics.progress.completed}/4 steps today. Continue when you’re ready.`;
+        sideP.textContent = (() => {
+          const total = (window.LighthouseJourney && window.LighthouseJourney.JOURNEY_STEPS)
+            ? window.LighthouseJourney.JOURNEY_STEPS.length
+            : 11;
+          const done = rawMetrics.progress.completed;
+          return done >= total
+            ? 'Today’s journey is complete. Come back tomorrow to keep the light on.'
+            : `You’ve completed ${done}/${total} steps today. Continue when you’re ready.`;
+        })();
       }
 
       if (window.Chart) {

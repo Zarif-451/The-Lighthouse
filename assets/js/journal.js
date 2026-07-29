@@ -182,9 +182,8 @@
       applySearch();
       showToast('Reflection saved.');
 
-      // Guided journey finale → return to dashboard
       if (window.Lighthouse.isFlowMode()) {
-        setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+        window.LighthouseJourney.showTransitionThen('journal', 'dashboard.html');
       }
     } catch (err) {
       const msg = (err && err.message) || 'Could not save reflection.';
@@ -236,12 +235,12 @@
         }
       } catch (e) { /* ignore */ }
 
-      // Soft gate for guided flow order
+      // Soft gate for guided flow order (must finish core journey first)
       if (window.Lighthouse.isFlowMode()) {
         const progress = await window.Lighthouse.getTodaysProgress();
-        if (!progress.steps.visual) {
-          showToast('Complete Visual Reflection first.');
-          setTimeout(() => { window.location.href = 'visual.html?flow=1'; }, 900);
+        if (!progress.coreComplete) {
+          showToast('Complete the previous journey steps first.');
+          setTimeout(() => { window.location.href = progress.nextHref || 'checkins.html?flow=1'; }, 900);
           return;
         }
         if (progress.steps.journal) {
@@ -249,7 +248,18 @@
           setTimeout(() => { window.location.href = 'dashboard.html'; }, 900);
           return;
         }
-        showToast('Final step — write a short reflection for today.');
+        showToast('Optional final step — write a short reflection, or skip to dashboard.');
+        const skip = document.createElement('button');
+        skip.type = 'button';
+        skip.className = 'btn btn-ghost';
+        skip.textContent = 'Skip to Dashboard';
+        skip.style.marginLeft = '8px';
+        skip.addEventListener('click', () => { window.location.href = 'dashboard.html'; });
+        const actions = document.querySelector('.form-actions') || $('#saveReflectionBtn')?.parentElement;
+        if (actions && !document.getElementById('skipJourneyBtn')) {
+          skip.id = 'skipJourneyBtn';
+          actions.appendChild(skip);
+        }
       }
 
       await loadReflections();
