@@ -51,6 +51,12 @@
       intro: 'Wait for the screen to turn teal, then tap as quickly as you can. Three valid attempts are recorded.',
       stepKey: 'reaction',
     },
+    click_accuracy: {
+      title: 'Click Accuracy Challenge',
+      eyebrow: 'Precision',
+      intro: 'Circular targets will appear one at a time. Click each target before it fades. Targets last a short while — aim carefully.',
+      stepKey: 'click_accuracy',
+    },
   };
 
   const ACTIVITY_KEYS = Object.keys(ACTIVITY_DEFS);
@@ -317,6 +323,121 @@
     });
   }
 
+  /* ----------------------------- Click Accuracy --------------------------- */
+  function runClickAccuracy() {
+    const DURATION = 25;
+    const TARGET_LIFETIME = 2200;
+    const TARGET_SIZE = 64;
+    const PADDING = 48;
+    let totalTargets = 0;
+    let hits = 0;
+    let misses = 0;
+    let currentTimer = null;
+    let activeTarget = null;
+    let gameOver = false;
+
+    const stage = $('#activityStage');
+    const arena = document.createElement('div');
+    arena.className = 'click-accuracy-arena';
+    arena.id = 'clickAccuracyArena';
+    stage.innerHTML = '';
+    stage.appendChild(arena);
+    $('#activityActions').innerHTML =
+      `<div style="display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap">
+        <span id="clickAccHits" style="color:var(--secondary);font-weight:700">Hits: 0</span>
+        <span id="clickAccTimer" style="color:var(--text-muted);font-weight:600">${DURATION}s</span>
+      </div>`;
+
+    const arenaEl = $('#clickAccuracyArena');
+    const hitsEl = $('#clickAccHits');
+    const timerEl = $('#clickAccTimer');
+
+    function randomPosition() {
+      const rect = arenaEl.getBoundingClientRect();
+      const maxX = rect.width - TARGET_SIZE - PADDING;
+      const maxY = rect.height - TARGET_SIZE - PADDING;
+      if (maxX <= 0 || maxY <= 0) return { left: '40%', top: '40%' };
+      const left = PADDING + Math.random() * maxX;
+      const top = PADDING + Math.random() * maxY;
+      return { left: `${Math.round(left)}px`, top: `${Math.round(top)}px` };
+    }
+
+    function spawnTarget() {
+      if (gameOver) return;
+      if (activeTarget) {
+        activeTarget.remove();
+        misses += 1;
+      }
+
+      totalTargets += 1;
+      const target = document.createElement('button');
+      target.type = 'button';
+      target.className = 'click-accuracy-target';
+      const pos = randomPosition();
+      target.style.left = pos.left;
+      target.style.top = pos.top;
+      target.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (gameOver) return;
+        hits += 1;
+        hitsEl.textContent = `Hits: ${hits}`;
+        clearTimeout(currentTimer);
+        target.remove();
+        activeTarget = null;
+        spawnTarget();
+      });
+      arenaEl.appendChild(target);
+
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        target.classList.add('show');
+        activeTarget = target;
+        currentTimer = setTimeout(() => {
+          if (activeTarget === target) {
+            target.remove();
+            activeTarget = null;
+            misses += 1;
+            if (!gameOver) spawnTarget();
+          }
+        }, TARGET_LIFETIME);
+      }));
+    }
+
+    arenaEl.addEventListener('click', (e) => {
+      if (e.target === arenaEl && !gameOver) {
+        misses += 1;
+      }
+    });
+
+    let elapsed = 0;
+    const timerInterval = setInterval(() => {
+      elapsed += 1;
+      const remaining = DURATION - elapsed;
+      timerEl.textContent = `${Math.max(0, remaining)}s`;
+      if (remaining <= 0) {
+        gameOver = true;
+        clearInterval(timerInterval);
+        clearTimeout(currentTimer);
+        if (activeTarget) { activeTarget.remove(); activeTarget = null; }
+        arenaEl.innerHTML = '';
+
+        const total = Math.max(1, totalTargets);
+        const accuracy = Math.round((hits / total) * 100);
+        finish(
+          `You hit ${hits}/${totalTargets} targets (${accuracy}% accuracy) with ${misses} missed.`,
+          {
+            score: hits,
+            accuracy,
+            attempts: 1,
+            completionTime: DURATION,
+            meta: { totalTargets: total, hits, misses, duration: DURATION },
+          }
+        );
+      }
+    }, 1000);
+
+    spawnTarget();
+  }
+
   $('#startActivityBtn').addEventListener('click', () => {
     startedAt = Date.now();
     $('#activityIntro').hidden = true;
@@ -324,6 +445,7 @@
     setHint('');
     if (type === 'word_puzzle') runWordPuzzle();
     else if (type === 'reaction') runReaction();
+    else if (type === 'click_accuracy') runClickAccuracy();
     else runMemory();
   });
 

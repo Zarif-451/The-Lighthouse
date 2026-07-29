@@ -85,6 +85,7 @@
         ['Behavioral activities', act.totalCompleted || 0, act.enough ? `Streak: ${act.streak || 0} day(s)` : 'Complete more activities to unlock this insight.'],
         ['Memory accuracy', act.memoryAvgAccuracy != null ? `${act.memoryAvgAccuracy}%` : '—', act.memoryAvgAccuracy != null ? 'Average recall accuracy' : 'Complete more activities to unlock this insight.'],
         ['Reaction speed', act.reactionAvgMs != null ? `${act.reactionAvgMs} ms` : '—', act.reactionAvgMs != null ? 'Average best times' : 'Complete more activities to unlock this insight.'],
+        ['Click Accuracy', act.clickAccuracyAvg != null ? `${act.clickAccuracyAvg}%` : '—', act.clickAccuracyAvg != null ? 'Average precision' : 'Complete more activities to unlock this insight.'],
       ];
       $('#compareGrid').innerHTML += compareExtra.map(([l, v, s]) => `<div class="compare-card"><div class="cc-label">${l}</div><div class="cc-val">${v}</div><div class="cc-sub">${s}</div></div>`).join('');
     } catch (err) {

@@ -737,6 +737,7 @@
     const memory = byType.memory || [];
     const reaction = byType.reaction || [];
     const word = byType.word_puzzle || [];
+    const clickAcc = byType.click_accuracy || [];
 
     const dates = [...new Set(rows.map((r) => r.activity_date))].sort().reverse();
     let streak = 0;
@@ -775,6 +776,8 @@
       lastActivityDate: rows[0] ? rows[0].activity_date : null,
       memoryAvgAccuracy: avg(memory, (r) => r.accuracy),
       reactionAvgMs: avg(reaction, (r) => r.score),
+      clickAccuracyAvg: avg(clickAcc, (r) => r.accuracy),
+      clickAccuracyCount: clickAcc.length,
       wordCompletions: word.length,
       weeklyCompletionDays: dates.filter((d) => {
         const t = new Date(`${d}T12:00:00`).getTime();
@@ -789,7 +792,7 @@
   /* ---------------------------- Today’s journey --------------------------- */
 
   async function getTodaysProgress() {
-    const [checkin, scenarioRows, visual, journalToday, memory, word, reaction] = await Promise.all([
+    const [checkin, scenarioRows, visual, journalToday, memory, word, reaction, clickAcc] = await Promise.all([
       getTodayCheckin(),
       getTodayScenarioResponses(),
       getTodayVisualReflection(),
@@ -797,6 +800,7 @@
       getTodayActivityResult('memory'),
       getTodayActivityResult('word_puzzle'),
       getTodayActivityResult('reaction'),
+      getTodayActivityResult('click_accuracy'),
     ]);
 
     const slotsDone = new Set(scenarioRows.map((r) => Number(r.slot) || 1));
@@ -814,6 +818,7 @@
       scenario_4: slotsDone.has(4),
       reaction: !!reaction,
       scenario_5: slotsDone.has(5),
+      click_accuracy: !!clickAcc,
       journal: !!journalToday,
       // Back-compat aliases for older UI checks
       scenario: slotsDone.has(1),
@@ -821,7 +826,7 @@
 
     const order = [
       'checkin', 'scenario_1', 'memory', 'scenario_2', 'visual',
-      'scenario_3', 'word_puzzle', 'scenario_4', 'reaction', 'scenario_5', 'journal',
+      'scenario_3', 'word_puzzle', 'scenario_4', 'reaction', 'scenario_5', 'click_accuracy', 'journal',
     ];
     const coreOrder = order.filter((k) => k !== 'journal');
     const completed = order.filter((k) => steps[k]).length;
@@ -839,6 +844,7 @@
       scenario_4: 'scenario.html?flow=1&slot=4',
       reaction: 'activity.html?flow=1&type=reaction',
       scenario_5: 'scenario.html?flow=1&slot=5',
+      click_accuracy: 'activity.html?flow=1&type=click_accuracy',
       journal: 'journal.html?flow=1',
     };
 
@@ -864,6 +870,7 @@
       scenario_4: 'Scenario 4',
       reaction: 'Reaction Challenge',
       scenario_5: 'Scenario 5',
+      click_accuracy: 'Click Accuracy Challenge',
       journal: 'Reflection Journal',
       scenario: 'Scenario Assessment',
     };
@@ -1534,8 +1541,10 @@
     const memoryRows = a.filter((x) => x.activity_type === 'memory');
     const reactionRows = a.filter((x) => x.activity_type === 'reaction');
     const wordRows = a.filter((x) => x.activity_type === 'word_puzzle');
+    const clickAccRows = a.filter((x) => x.activity_type === 'click_accuracy');
     const memoryAvg = average(memoryRows.map((x) => Number(x.accuracy)).filter((n) => !Number.isNaN(n)));
     const reactionAvg = average(reactionRows.map((x) => Number(x.score)).filter((n) => !Number.isNaN(n)));
+    const clickAccAvg = average(clickAccRows.map((x) => Number(x.accuracy)).filter((n) => !Number.isNaN(n)));
 
     const engagement = Math.min(100, Math.round(((c.length + r.length + s.length + v.length + a.length) / (isMonth ? 50 : 20)) * 100));
 
@@ -1550,6 +1559,8 @@
       activityCount: a.length,
       memoryAvgAccuracy: memoryAvg == null ? null : Math.round(memoryAvg * 10) / 10,
       reactionAvgMs: reactionAvg == null ? null : Math.round(reactionAvg),
+      clickAccuracyAvg: clickAccAvg == null ? null : Math.round(clickAccAvg * 10) / 10,
+      clickAccuracyCount: clickAccRows.length,
       wordPuzzleCount: wordRows.length,
       sleepAvg: sleepAvg == null ? null : Math.round(sleepAvg * 10) / 10,
       moodAvg: moodAvg == null ? null : Math.round(moodAvg * 10) / 10,

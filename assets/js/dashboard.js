@@ -139,7 +139,7 @@
 
     const order = progress.order || (window.LighthouseJourney && window.LighthouseJourney.JOURNEY_STEPS
       ? window.LighthouseJourney.JOURNEY_STEPS.map((s) => s.key)
-      : ['checkin', 'scenario_1', 'memory', 'scenario_2', 'visual', 'scenario_3', 'word_puzzle', 'scenario_4', 'reaction', 'scenario_5', 'journal']);
+      : ['checkin', 'scenario_1', 'memory', 'scenario_2', 'visual', 'scenario_3', 'word_puzzle', 'scenario_4', 'reaction', 'scenario_5', 'click_accuracy', 'journal']);
     const hrefs = {};
     order.forEach((key) => {
       hrefs[key] = (window.LighthouseJourney && window.LighthouseJourney.hrefFor)
@@ -354,6 +354,23 @@
         dir: (m.activityStats && m.activityStats.reactionAvgMs != null) ? 'up' : 'flat',
         demo: false,
         svg: '<path d="M13 2 3 14h8l-1 8 10-12h-8z"/>',
+      },
+      {
+        title: 'Click Accuracy',
+        ic: 'ic-cyan',
+        val: (m.activityStats && m.activityStats.clickAccuracyAvg != null)
+          ? String(m.activityStats.clickAccuracyAvg)
+          : '—',
+        unit: (m.activityStats && m.activityStats.clickAccuracyAvg != null) ? '% avg' : '',
+        pct: (m.activityStats && m.activityStats.clickAccuracyAvg != null)
+          ? Math.round(m.activityStats.clickAccuracyAvg)
+          : 0,
+        trend: (m.activityStats && m.activityStats.clickAccuracyAvg != null)
+          ? 'From Click Accuracy Challenge'
+          : 'Complete more activities to unlock this insight.',
+        dir: (m.activityStats && m.activityStats.clickAccuracyAvg != null) ? 'up' : 'flat',
+        demo: false,
+        svg: '<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4"/>',
       },
       {
         title: 'Activity Streak',

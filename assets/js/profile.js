@@ -128,7 +128,7 @@
 
     try {
       const act = await window.Lighthouse.getActivityStats();
-      const favLabels = { memory: 'Memory Challenge', word_puzzle: 'Word Puzzle', reaction: 'Reaction Challenge' };
+      const favLabels = { memory: 'Memory Challenge', word_puzzle: 'Word Puzzle', reaction: 'Reaction Challenge', click_accuracy: 'Click Accuracy Challenge' };
       const el = $('#activitySummary');
       if (el) {
         if (!act.totalCompleted) {
@@ -141,6 +141,7 @@
             ['Last Activity', act.lastActivityDate || '—'],
             ['Memory Accuracy', act.memoryAvgAccuracy != null ? `${act.memoryAvgAccuracy}%` : '—'],
             ['Reaction Avg', act.reactionAvgMs != null ? `${act.reactionAvgMs} ms` : '—'],
+            ['Click Accuracy', act.clickAccuracyAvg != null ? `${act.clickAccuracyAvg}%` : '—'],
           ].map(([l, v]) => `<div class="compare-card"><div class="cc-label">${l}</div><div class="cc-val" style="font-size:1.1rem">${v}</div></div>`).join('');
         }
       }

@@ -154,6 +154,11 @@ html[data-theme="dark"] .reaction-arena.wait { background: #0f172a; color: #e2e8
 html[data-theme="dark"] .reaction-arena.go { background: #14b8a6; color: #fff; }
 html[data-theme="dark"] .reaction-arena.early { background: #f59e0b; color: #fff; }
 
+html[data-theme="dark"] .click-accuracy-arena {
+  background: #0f172a;
+  border-color: #334155;
+}
+
 html[data-theme="dark"] .journey-step:hover,
 html[data-theme="dark"] .option-card:hover,
 html[data-theme="dark"] .summary-item:hover,

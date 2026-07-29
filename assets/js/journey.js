@@ -16,6 +16,7 @@
     { key: 'scenario_4', label: 'Scenario 4', kind: 'scenario', slot: 4 },
     { key: 'reaction', label: 'Reaction Challenge', kind: 'activity', activity: 'reaction' },
     { key: 'scenario_5', label: 'Scenario 5', kind: 'scenario', slot: 5 },
+    { key: 'click_accuracy', label: 'Click Accuracy', kind: 'activity', activity: 'click_accuracy' },
     { key: 'journal', label: 'Reflection Journal', kind: 'journal', optional: true },
   ];
 
@@ -29,7 +30,8 @@
     word_puzzle: { title: 'Nice focus!', body: 'Next: Scenario 4.' },
     scenario_4: { title: 'You’re doing well.', body: 'Here’s a Reaction Challenge.' },
     reaction: { title: 'Sharp work!', body: 'One more scenario to go.' },
-    scenario_5: { title: 'Journey almost complete!', body: 'Optional: write a short reflection, or head to your dashboard.' },
+    scenario_5: { title: 'Journey almost complete!', body: 'One final activity — Click Accuracy Challenge.' },
+    click_accuracy: { title: 'Great precision!', body: 'Optional: write a short reflection, or head to your dashboard.' },
     journal: { title: 'All set for today.', body: 'Your dashboard updates with today’s journey.' },
   };
 
@@ -56,6 +58,7 @@
       case 'memory': return pageHref('activity', { flow: '1', type: 'memory' });
       case 'word_puzzle': return pageHref('activity', { flow: '1', type: 'word_puzzle' });
       case 'reaction': return pageHref('activity', { flow: '1', type: 'reaction' });
+      case 'click_accuracy': return pageHref('activity', { flow: '1', type: 'click_accuracy' });
       case 'visual': return pageHref('visual', { flow: '1' });
       case 'journal': return pageHref('journal', { flow: '1' });
       default: return pageHref('dashboard');

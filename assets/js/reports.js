@@ -20,6 +20,7 @@
       ['Behavioral Activities', report.activityCount != null ? report.activityCount : '—'],
       ['Memory Accuracy', report.memoryAvgAccuracy != null ? report.memoryAvgAccuracy + '%' : '—'],
       ['Reaction Avg', report.reactionAvgMs != null ? report.reactionAvgMs + ' ms' : '—'],
+      ['Click Accuracy', report.clickAccuracyAvg != null ? report.clickAccuracyAvg + '%' : '—'],
       ['Word Puzzles', report.wordPuzzleCount != null ? report.wordPuzzleCount : '—'],
       ['Overall Engagement', report.enough ? report.engagement + '%' : '—'],
     ];
