@@ -208,9 +208,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         plainScores[k] = Math.round(Number(v) * 1000) / 1000;
       });
 
-      await window.Lighthouse.saveActivityResult('face_check', {
-        dominant: capturedData.dominant,
-        scores: plainScores
+      await window.Lighthouse.saveActivityResult({
+        activityType: 'face_check',
+        meta: {
+          dominant: capturedData.dominant,
+          scores: plainScores
+        }
       });
       if (inFlow()) {
         window.LighthouseJourney.showTransitionThen('face_check', window.LighthouseJourney.hrefFor('scenario_1'), { force: true });
