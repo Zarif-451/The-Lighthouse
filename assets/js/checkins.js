@@ -132,16 +132,16 @@
       showToast(result.created ? 'Check-in saved.' : 'Check-in updated.');
       await refresh();
 
-      // After check-in → always go to Scenario 1
-      const goScenario1 = window.LighthouseJourney.hrefFor('scenario_1');
+      // After check-in → go to Face Check
+      const goFaceCheck = window.LighthouseJourney.hrefFor('face_check');
       if (inFlow() || result.created) {
-        window.LighthouseJourney.showTransitionThen('checkin', goScenario1, { force: true });
+        window.LighthouseJourney.showTransitionThen('checkin', goFaceCheck, { force: true });
       } else {
-        // Even outside flow, if Scenario 1 is still pending, continue the journey
+        // Even outside flow, if Face Check or Scenario 1 is still pending, continue the journey
         try {
           const progress = await window.Lighthouse.getTodaysProgress();
-          if (progress && !progress.steps.scenario_1) {
-            window.LighthouseJourney.showTransitionThen('checkin', goScenario1, { force: true });
+          if (progress && (!progress.steps.face_check || !progress.steps.scenario_1)) {
+            window.LighthouseJourney.showTransitionThen('checkin', goFaceCheck, { force: true });
           }
         } catch (e) { /* ignore */ }
       }

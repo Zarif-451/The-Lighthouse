@@ -792,8 +792,9 @@
   /* ---------------------------- Today’s journey --------------------------- */
 
   async function getTodaysProgress() {
-    const [checkin, scenarioRows, visual, journalToday, memory, word, reaction, clickAcc] = await Promise.all([
+    const [checkin, faceCheck, scenarioRows, visual, journalToday, memory, word, reaction, clickAcc] = await Promise.all([
       getTodayCheckin(),
+      getTodayActivityResult('face_check'),
       getTodayScenarioResponses(),
       getTodayVisualReflection(),
       hasReflectionToday(),
@@ -809,6 +810,7 @@
 
     const steps = {
       checkin: !!checkin,
+      face_check: !!faceCheck,
       scenario_1: slotsDone.has(1),
       memory: !!memory,
       scenario_2: slotsDone.has(2),
@@ -825,16 +827,17 @@
     };
 
     const order = [
-      'checkin', 'scenario_1', 'memory', 'scenario_2', 'visual',
+      'checkin', 'face_check', 'scenario_1', 'memory', 'scenario_2', 'visual',
       'scenario_3', 'word_puzzle', 'scenario_4', 'reaction', 'scenario_5', 'click_accuracy', 'journal',
     ];
-    const coreOrder = order.filter((k) => k !== 'journal');
-    const completed = order.filter((k) => steps[k]).length;
+    const coreOrder = order.filter((k) => k !== 'journal' && k !== 'face_check');
+    const completed = order.filter((k) => steps[k] && k !== 'face_check' && k !== 'journal').length;
     const coreComplete = coreOrder.every((k) => steps[k]);
     const next = order.find((k) => !steps[k]) || null;
 
     const nextHrefMap = {
       checkin: 'checkins.html?flow=1',
+      face_check: 'facecheck.html?flow=1',
       scenario_1: 'scenario.html?flow=1&slot=1',
       memory: 'activity.html?flow=1&type=memory',
       scenario_2: 'scenario.html?flow=1&slot=2',
@@ -861,6 +864,7 @@
 
     const labels = {
       checkin: 'Daily Check-in',
+      face_check: 'Daily Face Check',
       scenario_1: 'Scenario 1',
       memory: 'Memory Challenge',
       scenario_2: 'Scenario 2',
@@ -1575,6 +1579,39 @@
     };
   }
 
+  async function generateDemoFaceData() {
+    const user = await requireAuth();
+    if (!user) throw new Error('Not logged in');
+    
+    // Check if demo data already exists to avoid spamming
+    const existing = await listActivityResults({ activityType: 'face_check', limit: 10 });
+    if (existing.length >= 7) {
+      return; // Already have enough data
+    }
+
+    const today = new Date();
+    const expressions = ['happy', 'neutral', 'neutral', 'happy', 'focused', 'calm', 'neutral'];
+    
+    for (let i = 1; i <= 7; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const dateStr = localDateString(d);
+      
+      const dominant = expressions[i - 1];
+      
+      await getClient().from('behavioral_activity_results').insert({
+        user_id: user.id,
+        activity_type: 'face_check',
+        activity_date: dateStr,
+        meta: {
+          dominant: dominant,
+          scores: { [dominant]: 0.85 }
+        },
+        completed_at: d.toISOString()
+      });
+    }
+  }
+
   /* ---------------------------- Admin APIs -------------------------------- */
 
   async function requireAdmin() {
@@ -2138,6 +2175,7 @@
     updatePreferences,
     changePassword,
     getProfileStats,
+    generateDemoFaceData,
     getInsightsData,
     getReport,
     requireAdmin,

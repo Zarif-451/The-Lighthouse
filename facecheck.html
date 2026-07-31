@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Face Check — Lighthouse</title>
+  <script src="assets/js/theme.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗼</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/theme-dark.css" />
+  <style>
+    .camera-container {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 3 / 4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow);
+    }
+    .camera-feed {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1); /* Mirror effect */
+    }
+    .camera-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+    .scanning-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(20, 184, 166, 0.2), transparent);
+      animation: scan 2s linear infinite;
+      pointer-events: none;
+      display: none;
+    }
+    @keyframes scan {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+    .controls {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-capture {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 4px solid var(--primary-050);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease;
+      box-shadow: 0 4px 12px rgba(30,58,138,0.3);
+    }
+    .btn-capture:hover:not(:disabled) {
+      transform: scale(1.05);
+      background: var(--primary-600);
+    }
+    .btn-capture:disabled {
+      background: #ccc;
+      border-color: #eee;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn-capture svg {
+      width: 28px;
+      height: 28px;
+      stroke: #fff;
+    }
+    .result-card {
+      text-align: center;
+      padding: 2rem;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      margin-top: 1.5rem;
+      display: none;
+    }
+    .result-emoji {
+      font-size: 4rem;
+      margin-bottom: 0.5rem;
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    .result-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .result-disclaimer {
+      font-size: 0.875rem;
+      color: var(--text-soft);
+      background: var(--bg-soft);
+      padding: 1rem;
+      border-radius: var(--radius);
+      margin: 1rem 0;
+      text-align: left;
+    }
+    .result-disclaimer strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: var(--text);
+    }
+    .details-toggle {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0.5rem;
+    }
+    .details-panel {
+      margin-top: 1rem;
+      text-align: left;
+      font-size: 0.875rem;
+      display: none;
+    }
+    .details-panel.show {
+      display: block;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+      color: var(--text-soft);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .camera-message {
+      position: absolute;
+      text-align: center;
+      color: rgba(255,255,255,0.7);
+      padding: 2rem;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body class="dash">
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="dashboard.html" class="brand">
+        <span class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 3M12 2 10.5 5"/><path d="M8.5 9h7l1.5 12h-10z"/><path d="M9 13h6M8.7 17h6.6"/><path d="M2 6l3 1M22 6l-3 1"/></svg>
+        </span>
+        Lighthouse
+      </a>
+      <div class="side-label">Menu</div>
+      <nav class="side-nav">
+        <a href="dashboard.html" data-nav="Dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="9" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="12" width="8" height="9" rx="2"/><rect x="3" y="16" width="8" height="5" rx="2"/></svg> Dashboard</a>
+        <a href="checkins.html" data-nav="Daily Check-ins"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg> Daily Check-ins</a>
+        <a href="journal.html" data-nav="Reflection Journal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg> Reflection Journal</a>
+        <a href="insights.html">Insights</a>
+        <a href="reports.html">Reports</a>
+        <a href="profile.html">Profile</a>
+        <a href="settings.html">Settings</a>
+        <a href="companion.html">AI Companion</a>
+      </nav>
+
+      <div class="side-foot">
+        <button class="logout-btn" id="logoutBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+          Log out
+        </button>
+      </div>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="hamburger" id="hamburger" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <div class="greeting">
+          <h1>Daily Face Check</h1>
+          <p>An optional, private reflection of what your face shows today.</p>
+        </div>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></button>
+        <button class="user-chip" id="userChip">
+          <span class="ava" id="userAva">U</span>
+          <span class="u-meta"><span class="u-name" id="userName">User</span><span class="u-role">Personal account</span></span>
+        </button>
+      </header>
+
+      <div class="content" style="max-width: 600px; margin: 0 auto;">
+        
+        <div class="flow-banner rise" id="flowBanner" hidden>
+          <div>
+            <strong>Today’s wellbeing journey</strong>
+            <p>Step 2 of 12 — This step is optional. You can skip it at any time.</p>
+          </div>
+        </div>
+
+        <section class="card card-pad rise" id="mainSection">
+          <div class="camera-container" id="cameraContainer">
+            <div class="camera-message" id="cameraMessage">Loading AI models...</div>
+            <video id="videoFeed" class="camera-feed" autoplay playsinline muted></video>
+            <canvas id="photoCanvas" class="camera-canvas" style="display: none;"></canvas>
+            <div class="scanning-overlay" id="scanningOverlay"></div>
+          </div>
+          
+          <div class="controls" id="cameraControls">
+            <button class="btn btn-outline" id="skipBtn">Skip this step</button>
+            <button class="btn-capture" id="captureBtn" aria-label="Take photo" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+
+          <div class="result-card" id="resultCard">
+            <div class="result-emoji" id="resultEmoji">🙂</div>
+            <div class="result-title" id="resultTitle">Calm Expression</div>
+            
+            <div class="result-disclaimer">
+              <strong>Visible expression only.</strong>
+              This is an estimate based only on your visible facial expression. It may not reflect how you actually feel and is intended only for self-reflection. This analysis ran entirely in your browser. No image was uploaded or saved.
+            </div>
+
+            <button class="details-toggle" id="detailsToggle">Show confidence details</button>
+            <div class="details-panel" id="detailsPanel">
+              <!-- Populated by JS -->
+            </div>
+
+            <div class="controls" style="margin-top: 1.5rem;">
+              <button class="btn btn-outline" id="retakeBtn">Retake</button>
+              <button class="btn btn-primary" id="saveContinueBtn">Save & Continue</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <span class="t-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+    <span id="toastMsg">Success</span>
+  </div>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Face API -->
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/journey.js"></script>
+  <script src="assets/js/shell.js"></script>
+  <script src="assets/js/facecheck.js"></script>
+</body>
+</html>

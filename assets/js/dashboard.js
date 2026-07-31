@@ -152,7 +152,7 @@
       const done = !!progress.steps[key];
       const isNext = progress.next === key;
       const locked = !done && !isNext;
-      const optional = key === 'journal';
+      const optional = key === 'journal' || key === 'face_check';
       const cls = `journey-step${done ? ' done' : ''}${isNext ? ' next' : ''}${locked ? ' locked' : ''}${optional ? ' optional' : ''}`;
       const sub = done ? 'Done' : isNext ? 'Up next' : optional ? 'Optional' : 'Locked';
       const href = locked ? '#' : (hrefs[key] || '#');

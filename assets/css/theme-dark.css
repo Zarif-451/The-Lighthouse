@@ -159,6 +159,13 @@ html[data-theme="dark"] .click-accuracy-arena {
   border-color: #334155;
 }
 
+html[data-theme="dark"] .chat-shell { background: #1a1f2e; border-color: #334155; }
+html[data-theme="dark"] .chat-bubble.ai .chat-content { background: #0f172a; border-color: #334155; }
+html[data-theme="dark"] .chat-prompt { background: #111827; border-color: #334155; }
+html[data-theme="dark"] .chat-prompt:hover { background: rgba(20,184,166,0.08); }
+html[data-theme="dark"] .chat-input { background: #0f172a; border-color: #334155; }
+html[data-theme="dark"] .chat-footer { background: #111827; border-color: #334155; }
+
 html[data-theme="dark"] .journey-step:hover,
 html[data-theme="dark"] .option-card:hover,
 html[data-theme="dark"] .summary-item:hover,

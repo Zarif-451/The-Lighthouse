@@ -45,6 +45,54 @@
       lineChart($('#moodChart'), data.moodSeries.map((x) => x.label), data.moodSeries.map((x) => x.value), '#3B82F6');
       lineChart($('#prodChart'), data.prodSeries.map((x) => x.label), data.prodSeries.map((x) => x.value), '#F59E0B');
 
+      const fCanvas = $('#faceChart');
+      const demoBtn = $('#demoFaceBtn');
+      if (demoBtn) {
+        demoBtn.addEventListener('click', async () => {
+          demoBtn.disabled = true;
+          try {
+            await window.Lighthouse.generateDemoFaceData();
+            window.location.reload();
+          } catch (e) {
+            demoBtn.disabled = false;
+            showToast('Error generating demo data: ' + e.message);
+          }
+        });
+      }
+
+      const faceRows = (data.activityStats && data.activityStats.byType && data.activityStats.byType['face_check']) || [];
+      const faceCounts = {};
+      faceRows.forEach(r => {
+        if (r.meta && r.meta.dominant) {
+          faceCounts[r.meta.dominant] = (faceCounts[r.meta.dominant] || 0) + 1;
+        }
+      });
+      const faceLabels = Object.keys(faceCounts);
+      const faceValues = faceLabels.map(k => faceCounts[k]);
+      
+      if (!faceLabels.length) {
+        if (fCanvas) {
+          fCanvas.style.display = 'none';
+          const wrap = fCanvas.parentElement;
+          const empty = document.createElement('div');
+          empty.className = 'insight-empty';
+          empty.textContent = 'Not enough data yet. Complete daily face checks to unlock this insight.';
+          wrap.appendChild(empty);
+        }
+      } else {
+        if (demoBtn) demoBtn.style.display = 'none';
+        if (fCanvas) {
+          const prettyFaces = faceLabels.map(l => l.charAt(0).toUpperCase() + l.slice(1));
+          const colors = ['#8b5cf6', '#3B82F6', '#14B8A6', '#F59E0B', '#fb7185', '#22d3ee', '#64748b', '#475569'];
+          charts.push(new Chart(fCanvas.getContext('2d'), {
+            type: 'doughnut',
+            data: { labels: prettyFaces, datasets: [{ data: faceValues, backgroundColor: colors, borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false } } },
+          }));
+          $('#faceLegend').innerHTML = prettyFaces.map((p, i) => `<span class="lg"><i style="background:${colors[i % colors.length]}"></i>${p}</span>`).join('');
+        }
+      }
+
       const labels = Object.keys(data.visualCounts);
       const values = labels.map((k) => data.visualCounts[k]);
       const vCanvas = $('#visualChart');

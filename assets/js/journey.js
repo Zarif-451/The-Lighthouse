@@ -7,6 +7,7 @@
 
   const JOURNEY_STEPS = [
     { key: 'checkin', label: 'Daily Check-in', kind: 'checkin' },
+    { key: 'face_check', label: 'Daily Face Check', kind: 'face_check', optional: true },
     { key: 'scenario_1', label: 'Scenario 1', kind: 'scenario', slot: 1 },
     { key: 'memory', label: 'Memory Challenge', kind: 'activity', activity: 'memory' },
     { key: 'scenario_2', label: 'Scenario 2', kind: 'scenario', slot: 2 },
@@ -21,7 +22,8 @@
   ];
 
   const TRANSITIONS = {
-    checkin: { title: 'Great job!', body: 'Let’s continue with Scenario 1.' },
+    checkin: { title: 'Great job!', body: 'Let’s do a quick Face Check.' },
+    face_check: { title: 'Noted.', body: 'Let’s continue with Scenario 1.' },
     scenario_1: { title: 'Nice work!', body: 'Here’s a quick Memory Challenge.' },
     memory: { title: 'Well done!', body: 'Next up: Scenario 2.' },
     scenario_2: { title: 'You’re making great progress.', body: 'Time for a Visual Reflection.' },
@@ -50,6 +52,7 @@
   function hrefFor(key) {
     switch (key) {
       case 'checkin': return pageHref('checkins', { flow: '1' });
+      case 'face_check': return pageHref('facecheck', { flow: '1' });
       case 'scenario_1': return pageHref('scenario', { flow: '1', slot: '1' });
       case 'scenario_2': return pageHref('scenario', { flow: '1', slot: '2' });
       case 'scenario_3': return pageHref('scenario', { flow: '1', slot: '3' });
@@ -168,6 +171,8 @@
     const done = !!progress.steps[stepKey];
     const isNext = progress.next === stepKey;
     if (stepKey === 'journal' && progress.coreComplete) return true;
+    if (stepKey === 'face_check' && progress.steps.checkin) return true;
+    if (stepKey === 'scenario_1' && progress.next === 'face_check') return true;
     if (done || isNext) return true;
 
     const toast = typeof showToast === 'function' ? showToast : () => {};
