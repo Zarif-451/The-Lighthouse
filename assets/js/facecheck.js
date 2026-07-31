@@ -202,9 +202,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     saveContinueBtn.disabled = true;
     saveContinueBtn.textContent = 'Saving...';
     try {
+      // Convert face-api's Float32Array-backed expressions to a plain JSON object
+      const plainScores = {};
+      Object.entries(capturedData.scores).forEach(([k, v]) => {
+        plainScores[k] = Math.round(Number(v) * 1000) / 1000;
+      });
+
       await window.Lighthouse.saveActivityResult('face_check', {
         dominant: capturedData.dominant,
-        scores: capturedData.scores
+        scores: plainScores
       });
       if (inFlow()) {
         window.LighthouseJourney.showTransitionThen('face_check', window.LighthouseJourney.hrefFor('scenario_1'), { force: true });
@@ -214,9 +220,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     } catch (e) {
       console.error('Save error:', e);
-      alert('Failed to save result.');
       saveContinueBtn.disabled = false;
       saveContinueBtn.textContent = 'Save & Continue';
+      // Show toast if available, fall back to alert
+      if (window.LighthouseShell && window.LighthouseShell.showToast) {
+        window.LighthouseShell.showToast((e && e.message) || 'Failed to save result.');
+      } else {
+        alert((e && e.message) || 'Failed to save result.');
+      }
     }
   });
 
