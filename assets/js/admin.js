@@ -233,8 +233,9 @@
     const body = $('#scenariosBody');
 
     function render(rows) {
-      body.innerHTML = rows.map((s) => `
+      body.innerHTML = rows.map((s, idx) => `
         <tr>
+          <td>${idx + 1}</td>
           <td>${window.Lighthouse.escapeHtml(s.title)}</td>
           <td>${window.Lighthouse.escapeHtml(s.category)}</td>
           <td>${s.is_active === false ? 'Disabled' : 'Enabled'}</td>

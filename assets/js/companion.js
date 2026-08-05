@@ -6,58 +6,43 @@
   // In-session conversation history (role: 'user'|'ai', content: string)
   let conversationHistory = [];
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // SUGGESTION BUTTON CONFIGURATION
-  // Labels match the HTML exactly. Prompts are what actually gets sent to AI.
-  // ─────────────────────────────────────────────────────────────────────────
+  // BASE_SUGGESTIONS — prompts for each button (matches HTML order exactly)
+  // Buttons with data-dynamic-slot are replaced at runtime based on today's activity.
   const BASE_SUGGESTIONS = [
-    {
-      label: 'Summarize my week',
-      prompt: 'Based on my Lighthouse data, summarize how my week has gone — check-ins, sleep, mood, and any activities I completed.',
-    },
-    {
-      label: 'Explain my dashboard',
-      prompt: 'Explain what my current Lighthouse dashboard metrics mean — my wellness score, sleep average, mood trend, and activity streak.',
-    },
-    {
-      label: "Discuss today's reflection",
-      prompt: "Let's discuss my most recent journal reflection. What does it reveal about my current state, and are there any themes worth exploring?",
-    },
-    {
-      label: 'Give me a productivity tip',
-      prompt: 'Based on my check-in data showing my energy and productivity levels, give me one practical, specific tip for improving my productivity today.',
-    },
-    {
-      label: 'Help me improve my focus',
-      prompt: 'Looking at my Lighthouse activity results — especially memory and click accuracy — help me understand how my focus has been and suggest one concrete improvement.',
-    },
-    {
-      label: 'What patterns do you notice?',
-      prompt: 'Looking at my Lighthouse data across check-ins, activities, and reflections, what meaningful patterns or trends do you notice about my wellbeing?',
-    },
+    // Group: Your data
+    { prompt: 'Based on my Lighthouse data, summarize how my week has gone — check-ins, sleep, mood, and any activities I completed.' },
+    { prompt: 'Explain what my current Lighthouse dashboard metrics mean — my wellness score, sleep average, mood trend, and activity streak.' },
+    { prompt: 'Show me a summary of my overall Lighthouse progress — daily journey completion, activity stats, and how I am trending over time.' },
+    { prompt: 'Tell me about my current Lighthouse streak — how many consecutive days I have been active, and how it compares to my personal best.' },
+    // Group: Activities
+    { prompt: 'Explain my Memory Challenge results — my average accuracy, my most recent score, and how I am trending over time.' },
+    { prompt: 'Explain my Reaction Challenge results — my average reaction time, my most recent score, and whether I am improving.' },
+    // Group: Reflect
+    { prompt: "Let's discuss my most recent journal reflection. What does it reveal about my current state, and are there any themes worth exploring?" },
+    { prompt: 'Looking at my Lighthouse data across check-ins, activities, and reflections, what meaningful patterns or trends do you notice about my wellbeing?' },
+    { prompt: 'Based on my check-in data showing my energy and productivity levels, give me one practical, specific tip for improving my productivity today.' },
+    { prompt: 'Looking at my Lighthouse activity results — especially memory and click accuracy — help me understand how my focus has been and suggest one concrete improvement.' },
   ];
 
-  // Dynamic suggestions that replace base ones after certain activities are done
+  // Dynamic suggestions — injected into data-dynamic-slot buttons based on
+  // today's completed activities. Each slot maps to a data-dynamic-slot attribute.
+  // slot 0 → Memory button, slot 1 → Reaction button, slot 2 → Journal button
   const DYNAMIC_SUGGESTIONS = {
     memory: [
-      { label: "Explain today's memory result", prompt: 'Explain my Memory Challenge result from today — what does my accuracy score mean and how does it compare to my average?' },
-      { label: 'Show my memory trend', prompt: 'How has my Memory Challenge performance trended over my recent sessions? Am I improving?' },
+      { text: '🧠 Explain today\'s Memory result', prompt: 'Explain my Memory Challenge result from today — what does my accuracy score mean and how does it compare to my overall average?' },
+      { text: '📊 Compare with yesterday', prompt: 'How does my Memory Challenge score today compare to yesterday\'s result? Am I improving?' },
     ],
     reaction: [
-      { label: 'Explain my reaction time', prompt: 'Explain my Reaction Challenge result today — is my reaction time fast or slow compared to my average?' },
-      { label: 'How can I improve my reactions?', prompt: 'Based on my Reaction Challenge history, what can I do to improve my reaction speed?' },
+      { text: '⚡ Explain today\'s Reaction result', prompt: 'Explain my Reaction Challenge result from today — is my reaction time fast or slow compared to my average?' },
+      { text: '📈 How can I improve?', prompt: 'Based on my Reaction Challenge history, what can I do to improve my reaction speed?' },
     ],
     click_accuracy: [
-      { label: 'Explain my click accuracy', prompt: 'Explain my Click Accuracy result from today — what does my score mean and how am I doing overall?' },
-      { label: 'Compare with my average', prompt: 'How does my click accuracy today compare to my historical average? Am I getting better?' },
+      { text: '🎯 Explain today\'s Click Accuracy', prompt: 'Explain my Click Accuracy result from today — what does my score mean and how am I doing overall?' },
+      { text: '📊 Compare with my average', prompt: 'How does my click accuracy today compare to my historical average? Am I getting better?' },
     ],
     journal: [
-      { label: "Summarize today's reflection", prompt: 'Summarize my most recent journal reflection and highlight any key themes or emotions I expressed.' },
-      { label: 'What themes appear most often?', prompt: 'Looking at all my recent journal reflections, what themes or topics appear most frequently?' },
-    ],
-    checkin: [
-      { label: 'How is my sleep trending?', prompt: 'Based on my recent check-ins, how has my sleep been trending? Is it improving or declining?' },
-      { label: 'How has my mood been?', prompt: 'Based on my check-in history, what has my mood trend looked like recently?' },
+      { text: '📝 Summarize today\'s reflection', prompt: 'Summarize my most recent journal reflection and highlight any key themes or emotions I expressed.' },
+      { text: '🔍 What themes appear most often?', prompt: 'Looking at all my recent journal reflections, what themes or topics appear most frequently?' },
     ],
   };
 
@@ -120,40 +105,30 @@
 
   // ─────────────────────────────────────────────────────────────────────────
   // DYNAMIC SUGGESTION UPDATER
-  // Replaces up to 2 base suggestion buttons based on today's activity.
-  // Only modifies the dataset.prompt — labels remain unchanged on the HTML.
+  // Targets buttons by data-dynamic-slot attribute so DOM order doesn't matter.
+  // slot 0 → Memory button, slot 1 → Reaction button, slot 2 → Journal button
   // ─────────────────────────────────────────────────────────────────────────
   function updateDynamicSuggestions(context) {
     if (!context) return;
 
-    const btnEls = Array.from($$('.chat-prompt'));
-    if (!btnEls.length) return;
-
     const tp = context.todaysProgress?.steps || {};
     const ta = context.todayActivities || {};
 
-    // Determine which dynamic set to inject (priority order)
-    const candidates = [];
-    if (ta.memory) candidates.push(...DYNAMIC_SUGGESTIONS.memory);
-    if (ta.reaction) candidates.push(...DYNAMIC_SUGGESTIONS.reaction);
-    if (ta.click_accuracy) candidates.push(...DYNAMIC_SUGGESTIONS.click_accuracy);
-    if (tp.journal) candidates.push(...DYNAMIC_SUGGESTIONS.journal);
-    if (tp.checkin) candidates.push(...DYNAMIC_SUGGESTIONS.checkin);
+    // Map: which dynamic set applies to each slot
+    const slotMap = [
+      ta.memory        ? DYNAMIC_SUGGESTIONS.memory        : null,  // slot 0
+      ta.reaction      ? DYNAMIC_SUGGESTIONS.reaction      :
+      ta.click_accuracy? DYNAMIC_SUGGESTIONS.click_accuracy: null,  // slot 1
+      tp.journal       ? DYNAMIC_SUGGESTIONS.journal       : null,  // slot 2
+    ];
 
-    if (!candidates.length) return;
-
-    // Replace slots 4 and 5 (index 3 and 4 = "Give me a productivity tip" and "Help me improve my focus")
-    // with the most relevant dynamic suggestions
-    const toInject = candidates.slice(0, 2);
-    const slots = [3, 4]; // zero-indexed positions in the 6-button grid
-
-    toInject.forEach((suggestion, i) => {
-      const btn = btnEls[slots[i]];
-      if (btn) {
-        btn.dataset.prompt = suggestion.prompt;
-        // Optionally update the visible label too
-        btn.textContent = suggestion.label;
-      }
+    slotMap.forEach((suggestions, slotIndex) => {
+      if (!suggestions) return;
+      const btn = document.querySelector(`[data-dynamic-slot="${slotIndex}"]`);
+      if (!btn) return;
+      const s = suggestions[0]; // use first suggestion for the button
+      btn.dataset.prompt = s.prompt;
+      btn.textContent = s.text;
     });
   }
 

@@ -55,12 +55,21 @@
               <h2>Hi<span id="welcomeName"></span>, I'm your Lighthouse companion</h2>
               <p>I can help you reflect, observe patterns, and find small ways forward. Your privacy is my priority — I only see what you choose to share.</p>
               <div class="chat-prompts" id="chatPrompts">
-                <button class="chat-prompt" data-prompt="Summarize my week">Summarize my week</button>
-                <button class="chat-prompt" data-prompt="Explain my dashboard">Explain my dashboard</button>
-                <button class="chat-prompt" data-prompt="Discuss today's reflection">Discuss today&rsquo;s reflection</button>
-                <button class="chat-prompt" data-prompt="Give me a productivity tip">Give me a productivity tip</button>
-                <button class="chat-prompt" data-prompt="Help me improve my focus">Help me improve my focus</button>
-                <button class="chat-prompt" data-prompt="What patterns do you notice?">What patterns do you notice?</button>
+                <div class="chat-prompts-group-label">Your data</div>
+                <button class="chat-prompt" data-prompt="Summarize my week">📅 Summarize my week</button>
+                <button class="chat-prompt" data-prompt="Explain my dashboard">📊 Explain my dashboard</button>
+                <button class="chat-prompt" data-prompt="Show my progress">📈 Show my progress</button>
+                <button class="chat-prompt" data-prompt="Show my current streak">🔥 Show my current streak</button>
+
+                <div class="chat-prompts-group-label">Activities</div>
+                <button class="chat-prompt" data-prompt="Explain my Memory Challenge" data-dynamic-slot="0">🧠 Explain my Memory Challenge</button>
+                <button class="chat-prompt" data-prompt="Explain my Reaction Challenge" data-dynamic-slot="1">⚡ Explain my Reaction Challenge</button>
+
+                <div class="chat-prompts-group-label">Reflect</div>
+                <button class="chat-prompt" data-prompt="Discuss today's reflection" data-dynamic-slot="2">📝 Discuss today&#8217;s reflection</button>
+                <button class="chat-prompt" data-prompt="What patterns do you notice?">🔍 What patterns do you notice?</button>
+                <button class="chat-prompt" data-prompt="Give me a productivity tip">💡 Give me a productivity tip</button>
+                <button class="chat-prompt" data-prompt="Help me improve my focus">🎯 Help me improve my focus</button>
               </div>
             </div>
             <div class="chat-messages" id="chatMessages" hidden></div>

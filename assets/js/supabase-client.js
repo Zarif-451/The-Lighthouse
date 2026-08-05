@@ -831,9 +831,13 @@
       'scenario_3', 'word_puzzle', 'scenario_4', 'reaction', 'scenario_5', 'click_accuracy', 'journal',
     ];
     const coreOrder = order.filter((k) => k !== 'journal' && k !== 'face_check');
-    const completed = order.filter((k) => steps[k] && k !== 'face_check' && k !== 'journal').length;
+    const completed = order.filter((k) => steps[k]).length;
     const coreComplete = coreOrder.every((k) => steps[k]);
-    const next = order.find((k) => !steps[k]) || null;
+    
+    // Find furthest completed step to prevent looping back to skipped optional steps
+    let lastCompletedIndex = -1;
+    order.forEach((k, i) => { if (steps[k]) lastCompletedIndex = i; });
+    const next = order.slice(lastCompletedIndex + 1).find((k) => !steps[k]) || null;
 
     const nextHrefMap = {
       checkin: 'checkins.html?flow=1',

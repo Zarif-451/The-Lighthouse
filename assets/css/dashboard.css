@@ -696,9 +696,20 @@ body.dash { background: var(--bg); overflow-x: hidden; }
 .chat-prompts {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  max-width: 480px;
+  max-width: 560px;
+  margin-top: 4px;
+}
+.chat-prompts-group-label {
+  grid-column: 1 / -1;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 6px 2px 2px;
+  margin-top: 2px;
 }
 .chat-prompt {
   appearance: none;
@@ -706,20 +717,22 @@ body.dash { background: var(--bg); overflow-x: hidden; }
   background: var(--bg);
   color: var(--text);
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  padding: 12px 14px;
+  padding: 10px 13px;
   border-radius: var(--radius);
   cursor: pointer;
   text-align: left;
-  transition: border-color var(--transition), background var(--transition), transform var(--transition);
+  line-height: 1.35;
+  transition: border-color var(--transition), background var(--transition), transform var(--transition), box-shadow var(--transition);
 }
 .chat-prompt:hover {
   border-color: var(--secondary);
   background: var(--secondary-050);
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
-.chat-prompt:active { transform: translateY(0); }
+.chat-prompt:active { transform: translateY(0); box-shadow: none; }
 
 .chat-messages {
   flex: 1;
@@ -878,6 +891,10 @@ body.dash { background: var(--bg); overflow-x: hidden; }
 @media (max-width: 640px) {
   .chat-prompts {
     grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+  .chat-prompts-group-label {
+    padding-top: 4px;
   }
   .chat-bubble { max-width: 92%; }
   .chat-shell { border-radius: 0; border: 0; }
