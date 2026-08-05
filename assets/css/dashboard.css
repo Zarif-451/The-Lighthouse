@@ -787,6 +787,22 @@ body.dash { background: var(--bg); overflow-x: hidden; }
 }
 .chat-bubble.user .chat-time { text-align: right; }
 
+/* Error state bubble */
+.chat-bubble-error .chat-content {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.25) !important;
+  color: #ef4444 !important;
+}
+
+/* Paragraph spacing in AI responses */
+.chat-bubble.ai .chat-content p {
+  margin: 0 0 8px;
+}
+.chat-bubble.ai .chat-content p:last-child {
+  margin-bottom: 0;
+}
+
+
 .chat-typing {
   display: flex;
   align-items: center;

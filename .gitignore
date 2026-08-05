@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Environment variables — NEVER commit these
+.env
+
+# Python virtual environment (used for report generation)
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db

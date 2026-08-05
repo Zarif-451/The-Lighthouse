@@ -1,0 +1,28 @@
+{
+  "name": "the-lighthouse",
+  "version": "1.0.0",
+  "description": "A personal wellbeing platform with a guided daily journey, private reflections, insights/reports, and a separate **Admin Portal** for platform monitoring and moderate care workflows.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zarif-451/The-Lighthouse.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Zarif-451/The-Lighthouse/issues"
+  },
+  "homepage": "https://github.com/Zarif-451/The-Lighthouse#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "groq-sdk": "^1.5.0"
+  }
+}

@@ -1,9 +1,165 @@
 (function () {
   'use strict';
   const { $, $$, showToast, bootUserPage } = window.LighthouseShell;
+  const LH = window.Lighthouse;
 
-  let messages = [];
+  // In-session conversation history (role: 'user'|'ai', content: string)
+  let conversationHistory = [];
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // SUGGESTION BUTTON CONFIGURATION
+  // Labels match the HTML exactly. Prompts are what actually gets sent to AI.
+  // ─────────────────────────────────────────────────────────────────────────
+  const BASE_SUGGESTIONS = [
+    {
+      label: 'Summarize my week',
+      prompt: 'Based on my Lighthouse data, summarize how my week has gone — check-ins, sleep, mood, and any activities I completed.',
+    },
+    {
+      label: 'Explain my dashboard',
+      prompt: 'Explain what my current Lighthouse dashboard metrics mean — my wellness score, sleep average, mood trend, and activity streak.',
+    },
+    {
+      label: "Discuss today's reflection",
+      prompt: "Let's discuss my most recent journal reflection. What does it reveal about my current state, and are there any themes worth exploring?",
+    },
+    {
+      label: 'Give me a productivity tip',
+      prompt: 'Based on my check-in data showing my energy and productivity levels, give me one practical, specific tip for improving my productivity today.',
+    },
+    {
+      label: 'Help me improve my focus',
+      prompt: 'Looking at my Lighthouse activity results — especially memory and click accuracy — help me understand how my focus has been and suggest one concrete improvement.',
+    },
+    {
+      label: 'What patterns do you notice?',
+      prompt: 'Looking at my Lighthouse data across check-ins, activities, and reflections, what meaningful patterns or trends do you notice about my wellbeing?',
+    },
+  ];
+
+  // Dynamic suggestions that replace base ones after certain activities are done
+  const DYNAMIC_SUGGESTIONS = {
+    memory: [
+      { label: "Explain today's memory result", prompt: 'Explain my Memory Challenge result from today — what does my accuracy score mean and how does it compare to my average?' },
+      { label: 'Show my memory trend', prompt: 'How has my Memory Challenge performance trended over my recent sessions? Am I improving?' },
+    ],
+    reaction: [
+      { label: 'Explain my reaction time', prompt: 'Explain my Reaction Challenge result today — is my reaction time fast or slow compared to my average?' },
+      { label: 'How can I improve my reactions?', prompt: 'Based on my Reaction Challenge history, what can I do to improve my reaction speed?' },
+    ],
+    click_accuracy: [
+      { label: 'Explain my click accuracy', prompt: 'Explain my Click Accuracy result from today — what does my score mean and how am I doing overall?' },
+      { label: 'Compare with my average', prompt: 'How does my click accuracy today compare to my historical average? Am I getting better?' },
+    ],
+    journal: [
+      { label: "Summarize today's reflection", prompt: 'Summarize my most recent journal reflection and highlight any key themes or emotions I expressed.' },
+      { label: 'What themes appear most often?', prompt: 'Looking at all my recent journal reflections, what themes or topics appear most frequently?' },
+    ],
+    checkin: [
+      { label: 'How is my sleep trending?', prompt: 'Based on my recent check-ins, how has my sleep been trending? Is it improving or declining?' },
+      { label: 'How has my mood been?', prompt: 'Based on my check-in history, what has my mood trend looked like recently?' },
+    ],
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // CONTEXT FETCHER — called fresh on every send
+  // ─────────────────────────────────────────────────────────────────────────
+  async function fetchLighthouseContext(user) {
+    try {
+      const [
+        todaysProgress,
+        recentCheckins,
+        recentReflections,
+        activityStats,
+        dashboardMetrics,
+        weeklyReport,
+        todayMemory,
+        todayReaction,
+        todayClickAcc,
+        profile,
+        scenarioResponses,
+      ] = await Promise.all([
+        LH.getTodaysProgress().catch(() => null),
+        LH.listCheckins({ limit: 14 }).catch(() => []),
+        LH.listReflections({ limit: 5 }).catch(() => []),
+        LH.getActivityStats().catch(() => null),
+        LH.getDashboardMetrics().catch(() => null),
+        LH.getReport('weekly').catch(() => null),
+        LH.getTodayActivityResult('memory').catch(() => null),
+        LH.getTodayActivityResult('reaction').catch(() => null),
+        LH.getTodayActivityResult('click_accuracy').catch(() => null),
+        LH.ensureProfile(user).catch(() => null),
+        LH.listScenarioResponses().catch(() => []),
+      ]);
+
+      return {
+        profile: profile ? {
+          displayName: profile.display_name || LH.displayNameFromUser(user),
+          occupation: profile.occupation || null,
+          interests: profile.interests || [],
+          shortBio: profile.short_bio || null,
+        } : null,
+        todaysProgress,
+        recentCheckins,
+        recentReflections,
+        activityStats,
+        dashboardMetrics,
+        weeklyReport,
+        scenarioCount: (scenarioResponses || []).length,
+        todayActivities: {
+          memory: todayMemory,
+          reaction: todayReaction,
+          click_accuracy: todayClickAcc,
+        },
+      };
+    } catch (err) {
+      console.warn('[Companion] Context fetch failed silently:', err?.message);
+      return null;
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // DYNAMIC SUGGESTION UPDATER
+  // Replaces up to 2 base suggestion buttons based on today's activity.
+  // Only modifies the dataset.prompt — labels remain unchanged on the HTML.
+  // ─────────────────────────────────────────────────────────────────────────
+  function updateDynamicSuggestions(context) {
+    if (!context) return;
+
+    const btnEls = Array.from($$('.chat-prompt'));
+    if (!btnEls.length) return;
+
+    const tp = context.todaysProgress?.steps || {};
+    const ta = context.todayActivities || {};
+
+    // Determine which dynamic set to inject (priority order)
+    const candidates = [];
+    if (ta.memory) candidates.push(...DYNAMIC_SUGGESTIONS.memory);
+    if (ta.reaction) candidates.push(...DYNAMIC_SUGGESTIONS.reaction);
+    if (ta.click_accuracy) candidates.push(...DYNAMIC_SUGGESTIONS.click_accuracy);
+    if (tp.journal) candidates.push(...DYNAMIC_SUGGESTIONS.journal);
+    if (tp.checkin) candidates.push(...DYNAMIC_SUGGESTIONS.checkin);
+
+    if (!candidates.length) return;
+
+    // Replace slots 4 and 5 (index 3 and 4 = "Give me a productivity tip" and "Help me improve my focus")
+    // with the most relevant dynamic suggestions
+    const toInject = candidates.slice(0, 2);
+    const slots = [3, 4]; // zero-indexed positions in the 6-button grid
+
+    toInject.forEach((suggestion, i) => {
+      const btn = btnEls[slots[i]];
+      if (btn) {
+        btn.dataset.prompt = suggestion.prompt;
+        // Optionally update the visible label too
+        btn.textContent = suggestion.label;
+      }
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // UI HELPERS
+  // ─────────────────────────────────────────────────────────────────────────
   function autoResize(el) {
     el.style.height = 'auto';
     el.style.height = Math.min(el.scrollHeight, 120) + 'px';
@@ -11,9 +167,7 @@
 
   function scrollToBottom() {
     const el = $('#chatMessages');
-    if (el) {
-      requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
-    }
+    if (el) requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
   }
 
   function showWelcome(visible) {
@@ -26,6 +180,7 @@
   function showTyping(visible) {
     const typing = $('#chatTyping');
     if (typing) typing.hidden = !visible;
+    if (visible) scrollToBottom();
   }
 
   function createBubble(role, text) {
@@ -41,7 +196,15 @@
       body.className = 'chat-body';
       const content = document.createElement('div');
       content.className = 'chat-content';
-      content.textContent = text;
+      // Safely render paragraphs and line breaks
+      content.innerHTML = '<p>' +
+        text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\n\n+/g, '</p><p>')
+          .replace(/\n/g, '<br>') +
+        '</p>';
       body.appendChild(content);
       const time = document.createElement('div');
       time.className = 'chat-time';
@@ -66,12 +229,32 @@
   }
 
   function addMessage(role, text) {
-    messages.push({ role, text, time: Date.now() });
+    conversationHistory.push({ role, content: text });
     const msgEl = $('#chatMessages');
     if (msgEl) {
       msgEl.appendChild(createBubble(role, text));
       scrollToBottom();
     }
+  }
+
+  function addErrorBubble(errorText) {
+    const msgEl = $('#chatMessages');
+    if (!msgEl) return;
+    const div = document.createElement('div');
+    div.className = 'chat-bubble ai chat-bubble-error';
+    const avatar = document.createElement('span');
+    avatar.className = 'chat-avatar';
+    avatar.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+    div.appendChild(avatar);
+    const body = document.createElement('div');
+    body.className = 'chat-body';
+    const content = document.createElement('div');
+    content.className = 'chat-content chat-content-error';
+    content.textContent = errorText;
+    body.appendChild(content);
+    div.appendChild(body);
+    msgEl.appendChild(div);
+    scrollToBottom();
   }
 
   function disableInput(disabled) {
@@ -83,70 +266,119 @@
 
   function clearInput() {
     const input = $('#chatInput');
-    if (input) {
-      input.value = '';
-      input.style.height = 'auto';
-    }
+    if (input) { input.value = ''; input.style.height = 'auto'; }
     const btn = $('#chatSendBtn');
     if (btn) btn.disabled = true;
   }
 
-  async function simulateReply(userMessage) {
+  // ─────────────────────────────────────────────────────────────────────────
+  // GROQ API CALL — fetches fresh context on every send
+  // ─────────────────────────────────────────────────────────────────────────
+  async function fetchGroqReply(userMessage, user) {
     disableInput(true);
     showTyping(true);
-    scrollToBottom();
 
-    await new Promise((r) => setTimeout(r, 1200 + Math.random() * 1200));
+    // Re-fetch context fresh on every send (per user requirement)
+    const context = await fetchLighthouseContext(user);
 
-    showTyping(false);
+    // Also update dynamic suggestions based on fresh context
+    updateDynamicSuggestions(context);
 
-    const lower = (userMessage || '').toLowerCase();
-    let reply = '';
+    // History excludes the message we're about to send (last item)
+    const history = conversationHistory.slice(0, -1);
 
-    if (lower.includes('summarize') || lower.includes('week') || lower.includes('summary')) {
-      reply = 'Based on your recent check-ins, your sleep has been averaging around 7 hours this week, your mood has been mostly "Good" with occasional dips midweek, and you have completed your daily journey steps on 4 out of 5 active days. Your wellness score is trending upward. Would you like me to go deeper into any of these areas?';
-    } else if (lower.includes('dashboard') || lower.includes('explain')) {
-      reply = 'Your dashboard gives you a real-time view of your wellbeing. At the top you will find your wellness score calculated from sleep, mood, productivity, physical activity, reflections, and journey completion. The trend chart shows your wellness over the last 30 days, and the distribution ring breaks your days into Excellent, Good, Moderate, and Needs Attention bands. Below that, the behavioural cards slot in specific metrics from each activity — Memory, Click Accuracy, Reaction Speed, and more. You can switch between Demo and Real-time analytics at any time using the toggle at the top of the charts.';
-    } else if (lower.includes('reflection') || lower.includes('today')) {
-      reply = 'Reflecting — even just a few sentences — helps you notice what is working and where you might need a little more care. If you have journaled today, you can view your latest entries on the dashboard. If you are in the middle of the daily journey, the Reflection Journal step unlocks once all the core activities are complete. Would you like a prompt to help you get started with a reflection right now?';
-    } else if (lower.includes('productivity') || lower.includes('tip')) {
-      reply = 'One simple productivity approach that works well alongside Lighthouse is the "3-3-3 method": identify three small wins you can achieve today, three medium tasks to move forward, and three moments of rest or recovery. This balances output with the self-care that Lighthouse encourages. If you try it, you can note how it felt in your daily check-in notes.';
-    } else if (lower.includes('focus') || lower.includes('improve')) {
-      reply = 'Improving focus often starts with reducing friction. Try a short timer — 20 or 25 minutes — for a single task, then take a 5-minute break. After a few focused blocks, step outside or look away from screens. This ties in well with the Memory Challenge and Click Accuracy Challenge in your daily journey, both of which gently exercise your concentration. If you complete those activities regularly, Lighthouse can show you your accuracy trends over time so you can see if your focus is improving.';
-    } else if (lower.includes('pattern') || lower.includes('notice')) {
-      reply = 'From what I can see, you are building a consistent habit of daily check-ins, which is the best foundation. Over time, patterns often emerge in a few key areas — sleep regularity, midweek energy dips, and which visual themes you gravitate toward. The Insights page tracks week-over-week comparisons for check-ins, reflections, and sleep so you can spot shifts early. Keeping your daily journey consistent is the best way to make those patterns visible.';
-    } else {
-      reply = 'That is a thoughtful question. I am here to support your wellbeing journey — I can help you reflect on your week, make sense of your dashboard and insights, suggest ways to improve focus or productivity, or help you notice patterns in your activity. Would any of those sound helpful right now?';
+    let retries = 0;
+    const MAX_RETRIES = 1;
+
+    while (retries <= MAX_RETRIES) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userMessage, history, context }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+        const data = await response.json();
+        showTyping(false);
+
+        if (!response.ok) {
+          if (response.status === 429 && retries < MAX_RETRIES) {
+            retries++;
+            showTyping(true);
+            await new Promise(r => setTimeout(r, 3000));
+            continue;
+          }
+          addErrorBubble(data.error || 'Something went wrong. Please try again.');
+          disableInput(false);
+          return;
+        }
+
+        if (data.reply) addMessage('ai', data.reply);
+        disableInput(false);
+        const input = $('#chatInput');
+        if (input) input.focus();
+        return;
+
+      } catch (err) {
+        showTyping(false);
+        if (err.name === 'AbortError') {
+          addErrorBubble('The response took too long. Please try again.');
+        } else if (!navigator.onLine) {
+          addErrorBubble('You appear to be offline. Please check your connection and try again.');
+        } else {
+          addErrorBubble('Could not reach the AI. Please try again in a moment.');
+        }
+        disableInput(false);
+        const input = $('#chatInput');
+        if (input) input.focus();
+        return;
+      }
     }
 
-    addMessage('ai', reply);
+    showTyping(false);
+    addErrorBubble('The AI is busy right now. Please try again in a moment.');
     disableInput(false);
-    const input = $('#chatInput');
-    if (input) input.focus();
   }
 
-  function sendMessage(text) {
+  // ─────────────────────────────────────────────────────────────────────────
+  // SEND FLOW
+  // ─────────────────────────────────────────────────────────────────────────
+  function sendMessage(text, user) {
     const trimmed = (text || '').trim();
     if (!trimmed) return;
-
-    if (messages.length === 0) showWelcome(false);
-
+    if (conversationHistory.length === 0) showWelcome(false);
     addMessage('user', trimmed);
     clearInput();
-
-    simulateReply(trimmed);
+    fetchGroqReply(trimmed, user);
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // INIT
+  // ─────────────────────────────────────────────────────────────────────────
   (async function init() {
     const session = await bootUserPage();
     if (!session) return;
     const { user } = session;
-    const name = window.Lighthouse.displayNameFromUser(user);
+    const name = LH.displayNameFromUser(user);
     const firstName = name.split(' ')[0] || '';
 
     if ($('#welcomeName')) {
       $('#welcomeName').textContent = firstName ? ` ${firstName}` : '';
     }
+
+    // Update base suggestion button prompts (labels stay as-is in HTML)
+    const promptBtns = Array.from($$('.chat-prompt'));
+    BASE_SUGGESTIONS.forEach((s, i) => {
+      if (promptBtns[i]) promptBtns[i].dataset.prompt = s.prompt;
+    });
+
+    // Prefetch context once on load to set dynamic suggestions early
+    fetchLighthouseContext(user).then(ctx => updateDynamicSuggestions(ctx));
 
     const input = $('#chatInput');
     const sendBtn = $('#chatSendBtn');
@@ -159,32 +391,30 @@
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
-          sendMessage(input.value);
+          sendMessage(input.value, user);
         }
       });
     }
 
     if (sendBtn) {
-      sendBtn.addEventListener('click', () => {
-        sendMessage(input.value);
-      });
+      sendBtn.addEventListener('click', () => sendMessage(input.value, user));
     }
 
     const cta = $('#startChatCta');
     if (cta) {
-      cta.addEventListener('click', () => {
-        if (input) input.focus();
-      });
+      cta.addEventListener('click', () => { if (input) input.focus(); });
     }
 
-    $('#chatPrompts').addEventListener('click', (e) => {
-      const btn = e.target.closest('.chat-prompt');
-      if (!btn) return;
-      const prompt = btn.dataset.prompt;
-      if (input) input.value = prompt;
-      autoResize(input);
-      if (sendBtn) sendBtn.disabled = false;
-      sendMessage(prompt);
-    });
+    const chatPrompts = $('#chatPrompts');
+    if (chatPrompts) {
+      chatPrompts.addEventListener('click', (e) => {
+        const btn = e.target.closest('.chat-prompt');
+        if (!btn) return;
+        const prompt = btn.dataset.prompt || btn.textContent.trim();
+        if (input) { input.value = prompt; autoResize(input); }
+        if (sendBtn) sendBtn.disabled = false;
+        sendMessage(prompt, user);
+      });
+    }
   })();
 })();
