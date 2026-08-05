@@ -171,8 +171,10 @@
     const done = !!progress.steps[stepKey];
     const isNext = progress.next === stepKey;
     if (stepKey === 'journal' && progress.coreComplete) return true;
+    // face_check is optional: allow access any time checkin is done
     if (stepKey === 'face_check' && progress.steps.checkin) return true;
-    if (stepKey === 'scenario_1' && progress.next === 'face_check') return true;
+    // scenario_1 is unlocked as long as checkin is done (face_check is optional and may be skipped)
+    if (stepKey === 'scenario_1' && progress.steps.checkin) return true;
     if (done || isNext) return true;
 
     const toast = typeof showToast === 'function' ? showToast : () => {};

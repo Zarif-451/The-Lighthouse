@@ -830,14 +830,34 @@
       'checkin', 'face_check', 'scenario_1', 'memory', 'scenario_2', 'visual',
       'scenario_3', 'word_puzzle', 'scenario_4', 'reaction', 'scenario_5', 'click_accuracy', 'journal',
     ];
-    const coreOrder = order.filter((k) => k !== 'journal' && k !== 'face_check');
+    // Steps that can be skipped without blocking progression
+    const optionalSteps = new Set(['face_check', 'journal']);
+    const coreOrder = order.filter((k) => !optionalSteps.has(k));
     const completed = order.filter((k) => steps[k]).length;
     const coreComplete = coreOrder.every((k) => steps[k]);
-    
-    // Find furthest completed step to prevent looping back to skipped optional steps
+
+    // Find the furthest completed step index
     let lastCompletedIndex = -1;
     order.forEach((k, i) => { if (steps[k]) lastCompletedIndex = i; });
-    const next = order.slice(lastCompletedIndex + 1).find((k) => !steps[k]) || null;
+
+    // Find next incomplete step, skipping optional steps that were bypassed
+    // An optional step is considered bypassed if the step AFTER it is already done
+    let next = null;
+    const remaining = order.slice(lastCompletedIndex + 1);
+    for (let ri = 0; ri < remaining.length; ri++) {
+      const k = remaining[ri];
+      if (steps[k]) continue; // already done
+      if (optionalSteps.has(k)) {
+        // Skip this optional step if the next step after it is already done
+        const nextInOrder = remaining[ri + 1];
+        if (nextInOrder && steps[nextInOrder]) continue;
+        // Also skip face_check if checkin is done and we already have scenario_1 data
+        // (means user previously skipped face_check and progressed)
+        if (k === 'face_check' && steps.checkin && steps.scenario_1) continue;
+      }
+      next = k;
+      break;
+    }
 
     const nextHrefMap = {
       checkin: 'checkins.html?flow=1',

@@ -130,7 +130,9 @@
       .then(() => {
         const fallback = window.LighthouseJourney.staticNextHref(def.stepKey);
         if (window.Lighthouse.isFlowMode()) {
-          window.LighthouseJourney.showTransitionThen(def.stepKey, fallback);
+          // force: true ensures we always go to the static next step without a DB re-query,
+          // preventing timing issues where the activity save hasn't propagated yet.
+          window.LighthouseJourney.showTransitionThen(def.stepKey, fallback, { force: true });
         } else {
           showDone(summary);
         }
@@ -451,7 +453,7 @@
 
   $('#continueJourneyBtn').addEventListener('click', () => {
     const fallback = window.LighthouseJourney.staticNextHref(def.stepKey);
-    window.LighthouseJourney.showTransitionThen(def.stepKey, fallback);
+    window.LighthouseJourney.showTransitionThen(def.stepKey, fallback, { force: true });
   });
 
   $('#logoutBtn').addEventListener('click', async () => {
